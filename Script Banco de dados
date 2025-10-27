@@ -1,0 +1,368 @@
+USE [master]
+GO
+/****** Object:  Database [SuporteTI_IA]    Script Date: 26/10/2025 19:52:40 ******/
+CREATE DATABASE [SuporteTI_IA]
+ CONTAINMENT = NONE
+ ON  PRIMARY 
+( NAME = N'SuporteTI_IA', FILENAME = N'D:\SQL2022\Microsoft SQL Server\MSSQL16.MSSQLSERVER\MSSQL\DATA\SuporteTI_IA.mdf' , SIZE = 8192KB , MAXSIZE = UNLIMITED, FILEGROWTH = 65536KB )
+ LOG ON 
+( NAME = N'SuporteTI_IA_log', FILENAME = N'D:\SQL2022\Microsoft SQL Server\MSSQL16.MSSQLSERVER\MSSQL\DATA\SuporteTI_IA_log.ldf' , SIZE = 73728KB , MAXSIZE = 2048GB , FILEGROWTH = 65536KB )
+ WITH CATALOG_COLLATION = DATABASE_DEFAULT, LEDGER = OFF
+GO
+ALTER DATABASE [SuporteTI_IA] SET COMPATIBILITY_LEVEL = 160
+GO
+IF (1 = FULLTEXTSERVICEPROPERTY('IsFullTextInstalled'))
+begin
+EXEC [SuporteTI_IA].[dbo].[sp_fulltext_database] @action = 'enable'
+end
+GO
+ALTER DATABASE [SuporteTI_IA] SET ANSI_NULL_DEFAULT OFF 
+GO
+ALTER DATABASE [SuporteTI_IA] SET ANSI_NULLS OFF 
+GO
+ALTER DATABASE [SuporteTI_IA] SET ANSI_PADDING OFF 
+GO
+ALTER DATABASE [SuporteTI_IA] SET ANSI_WARNINGS OFF 
+GO
+ALTER DATABASE [SuporteTI_IA] SET ARITHABORT OFF 
+GO
+ALTER DATABASE [SuporteTI_IA] SET AUTO_CLOSE OFF 
+GO
+ALTER DATABASE [SuporteTI_IA] SET AUTO_SHRINK OFF 
+GO
+ALTER DATABASE [SuporteTI_IA] SET AUTO_UPDATE_STATISTICS ON 
+GO
+ALTER DATABASE [SuporteTI_IA] SET CURSOR_CLOSE_ON_COMMIT OFF 
+GO
+ALTER DATABASE [SuporteTI_IA] SET CURSOR_DEFAULT  GLOBAL 
+GO
+ALTER DATABASE [SuporteTI_IA] SET CONCAT_NULL_YIELDS_NULL OFF 
+GO
+ALTER DATABASE [SuporteTI_IA] SET NUMERIC_ROUNDABORT OFF 
+GO
+ALTER DATABASE [SuporteTI_IA] SET QUOTED_IDENTIFIER OFF 
+GO
+ALTER DATABASE [SuporteTI_IA] SET RECURSIVE_TRIGGERS OFF 
+GO
+ALTER DATABASE [SuporteTI_IA] SET  ENABLE_BROKER 
+GO
+ALTER DATABASE [SuporteTI_IA] SET AUTO_UPDATE_STATISTICS_ASYNC OFF 
+GO
+ALTER DATABASE [SuporteTI_IA] SET DATE_CORRELATION_OPTIMIZATION OFF 
+GO
+ALTER DATABASE [SuporteTI_IA] SET TRUSTWORTHY OFF 
+GO
+ALTER DATABASE [SuporteTI_IA] SET ALLOW_SNAPSHOT_ISOLATION OFF 
+GO
+ALTER DATABASE [SuporteTI_IA] SET PARAMETERIZATION SIMPLE 
+GO
+ALTER DATABASE [SuporteTI_IA] SET READ_COMMITTED_SNAPSHOT OFF 
+GO
+ALTER DATABASE [SuporteTI_IA] SET HONOR_BROKER_PRIORITY OFF 
+GO
+ALTER DATABASE [SuporteTI_IA] SET RECOVERY FULL 
+GO
+ALTER DATABASE [SuporteTI_IA] SET  MULTI_USER 
+GO
+ALTER DATABASE [SuporteTI_IA] SET PAGE_VERIFY CHECKSUM  
+GO
+ALTER DATABASE [SuporteTI_IA] SET DB_CHAINING OFF 
+GO
+ALTER DATABASE [SuporteTI_IA] SET FILESTREAM( NON_TRANSACTED_ACCESS = OFF ) 
+GO
+ALTER DATABASE [SuporteTI_IA] SET TARGET_RECOVERY_TIME = 60 SECONDS 
+GO
+ALTER DATABASE [SuporteTI_IA] SET DELAYED_DURABILITY = DISABLED 
+GO
+ALTER DATABASE [SuporteTI_IA] SET ACCELERATED_DATABASE_RECOVERY = OFF  
+GO
+EXEC sys.sp_db_vardecimal_storage_format N'SuporteTI_IA', N'ON'
+GO
+ALTER DATABASE [SuporteTI_IA] SET QUERY_STORE = ON
+GO
+ALTER DATABASE [SuporteTI_IA] SET QUERY_STORE (OPERATION_MODE = READ_WRITE, CLEANUP_POLICY = (STALE_QUERY_THRESHOLD_DAYS = 30), DATA_FLUSH_INTERVAL_SECONDS = 900, INTERVAL_LENGTH_MINUTES = 60, MAX_STORAGE_SIZE_MB = 1000, QUERY_CAPTURE_MODE = AUTO, SIZE_BASED_CLEANUP_MODE = AUTO, MAX_PLANS_PER_QUERY = 200, WAIT_STATS_CAPTURE_MODE = ON)
+GO
+USE [SuporteTI_IA]
+GO
+/****** Object:  Table [dbo].[__EFMigrationsHistory]    Script Date: 26/10/2025 19:52:41 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[__EFMigrationsHistory](
+	[MigrationId] [nvarchar](150) NOT NULL,
+	[ProductVersion] [nvarchar](32) NOT NULL,
+ CONSTRAINT [PK___EFMigrationsHistory] PRIMARY KEY CLUSTERED 
+(
+	[MigrationId] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[Anexo]    Script Date: 26/10/2025 19:52:41 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[Anexo](
+	[id_anexo] [int] IDENTITY(1,1) NOT NULL,
+	[id_chamado] [int] NOT NULL,
+	[nome_arquivo] [varchar](255) NOT NULL,
+	[caminho_arquivo] [varchar](500) NOT NULL,
+	[data_envio] [datetime] NULL,
+	[Conteudo] [varbinary](max) NULL,
+PRIMARY KEY CLUSTERED 
+(
+	[id_anexo] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[Avaliacao]    Script Date: 26/10/2025 19:52:41 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[Avaliacao](
+	[id_avaliacao] [int] IDENTITY(1,1) NOT NULL,
+	[id_chamado] [int] NOT NULL,
+	[nota] [int] NOT NULL,
+	[comentario] [text] NULL,
+PRIMARY KEY CLUSTERED 
+(
+	[id_avaliacao] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[Categoria]    Script Date: 26/10/2025 19:52:41 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[Categoria](
+	[id_categoria] [int] IDENTITY(1,1) NOT NULL,
+	[nome] [varchar](50) NOT NULL,
+PRIMARY KEY CLUSTERED 
+(
+	[id_categoria] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY],
+UNIQUE NONCLUSTERED 
+(
+	[nome] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[Chamado]    Script Date: 26/10/2025 19:52:41 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[Chamado](
+	[id_chamado] [int] IDENTITY(1,1) NOT NULL,
+	[id_usuario] [int] NOT NULL,
+	[titulo] [varchar](100) NOT NULL,
+	[descricao] [text] NOT NULL,
+	[prioridade] [varchar](20) NOT NULL,
+	[status_chamado] [varchar](20) NOT NULL,
+	[data_abertura] [datetime] NULL,
+	[data_fechamento] [datetime] NULL,
+	[id_tecnico] [int] NULL,
+PRIMARY KEY CLUSTERED 
+(
+	[id_chamado] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[Chamado_Categoria]    Script Date: 26/10/2025 19:52:41 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[Chamado_Categoria](
+	[id_chamado] [int] NOT NULL,
+	[id_categoria] [int] NOT NULL,
+PRIMARY KEY CLUSTERED 
+(
+	[id_chamado] ASC,
+	[id_categoria] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[IAProcessamento]    Script Date: 26/10/2025 19:52:41 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[IAProcessamento](
+	[id_processamento] [int] IDENTITY(1,1) NOT NULL,
+	[entrada_texto] [text] NOT NULL,
+	[saida_classificacao] [varchar](100) NULL,
+	[solucao_sugerida] [text] NULL,
+	[data_processamento] [datetime] NULL,
+	[id_chamado] [int] NULL,
+PRIMARY KEY CLUSTERED 
+(
+	[id_processamento] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[Interacao]    Script Date: 26/10/2025 19:52:41 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[Interacao](
+	[id_interacao] [int] IDENTITY(1,1) NOT NULL,
+	[id_chamado] [int] NOT NULL,
+	[id_usuario] [int] NOT NULL,
+	[mensagem] [text] NOT NULL,
+	[data_hora] [datetime] NULL,
+	[origem] [nvarchar](20) NOT NULL,
+PRIMARY KEY CLUSTERED 
+(
+	[id_interacao] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[Relatorio]    Script Date: 26/10/2025 19:52:41 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[Relatorio](
+	[id_relatorio] [int] IDENTITY(1,1) NOT NULL,
+	[tipo] [varchar](100) NOT NULL,
+	[data_geracao] [datetime] NULL,
+	[conteudo] [text] NOT NULL,
+	[id_administrador] [int] NULL,
+PRIMARY KEY CLUSTERED 
+(
+	[id_relatorio] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[Solucao_Sugerida]    Script Date: 26/10/2025 19:52:41 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[Solucao_Sugerida](
+	[id_solucao] [int] IDENTITY(1,1) NOT NULL,
+	[id_chamado] [int] NOT NULL,
+	[titulo] [varchar](100) NOT NULL,
+	[conteudo] [text] NOT NULL,
+	[aceita] [bit] NULL,
+	[data_criacao] [datetime] NOT NULL,
+PRIMARY KEY CLUSTERED 
+(
+	[id_solucao] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[Tecnico_Categoria]    Script Date: 26/10/2025 19:52:41 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[Tecnico_Categoria](
+	[id_tecnico] [int] NOT NULL,
+	[id_categoria] [int] NOT NULL,
+PRIMARY KEY CLUSTERED 
+(
+	[id_tecnico] ASC,
+	[id_categoria] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[Usuario]    Script Date: 26/10/2025 19:52:41 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[Usuario](
+	[id_usuario] [int] IDENTITY(1,1) NOT NULL,
+	[nome] [varchar](100) NOT NULL,
+	[email] [varchar](100) NOT NULL,
+	[senha] [varchar](100) NOT NULL,
+	[tipo] [varchar](20) NOT NULL,
+	[ativo] [bit] NULL,
+	[cpf] [varchar](14) NULL,
+	[telefone] [varchar](15) NULL,
+	[endereco] [varchar](200) NULL,
+	[data_nascimento] [date] NULL,
+	[codigo_verificacao] [nvarchar](6) NULL,
+	[expiracao_codigo] [datetime2](7) NULL,
+	[CodigoValidado] [bit] NOT NULL,
+PRIMARY KEY CLUSTERED 
+(
+	[id_usuario] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY],
+UNIQUE NONCLUSTERED 
+(
+	[email] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+ALTER TABLE [dbo].[Anexo] ADD  DEFAULT (getdate()) FOR [data_envio]
+GO
+ALTER TABLE [dbo].[Chamado] ADD  DEFAULT (getdate()) FOR [data_abertura]
+GO
+ALTER TABLE [dbo].[IAProcessamento] ADD  DEFAULT (getdate()) FOR [data_processamento]
+GO
+ALTER TABLE [dbo].[Interacao] ADD  DEFAULT (getdate()) FOR [data_hora]
+GO
+ALTER TABLE [dbo].[Interacao] ADD  DEFAULT ('Cliente') FOR [origem]
+GO
+ALTER TABLE [dbo].[Relatorio] ADD  DEFAULT (getdate()) FOR [data_geracao]
+GO
+ALTER TABLE [dbo].[Solucao_Sugerida] ADD  DEFAULT ((0)) FOR [aceita]
+GO
+ALTER TABLE [dbo].[Solucao_Sugerida] ADD  DEFAULT (getdate()) FOR [data_criacao]
+GO
+ALTER TABLE [dbo].[Usuario] ADD  DEFAULT ((1)) FOR [ativo]
+GO
+ALTER TABLE [dbo].[Usuario] ADD  DEFAULT ((0)) FOR [CodigoValidado]
+GO
+ALTER TABLE [dbo].[Anexo]  WITH CHECK ADD FOREIGN KEY([id_chamado])
+REFERENCES [dbo].[Chamado] ([id_chamado])
+GO
+ALTER TABLE [dbo].[Avaliacao]  WITH CHECK ADD FOREIGN KEY([id_chamado])
+REFERENCES [dbo].[Chamado] ([id_chamado])
+GO
+ALTER TABLE [dbo].[Chamado]  WITH CHECK ADD FOREIGN KEY([id_usuario])
+REFERENCES [dbo].[Usuario] ([id_usuario])
+GO
+ALTER TABLE [dbo].[Chamado]  WITH CHECK ADD  CONSTRAINT [FK_Chamado_Usuario_Tecnico] FOREIGN KEY([id_tecnico])
+REFERENCES [dbo].[Usuario] ([id_usuario])
+GO
+ALTER TABLE [dbo].[Chamado] CHECK CONSTRAINT [FK_Chamado_Usuario_Tecnico]
+GO
+ALTER TABLE [dbo].[Chamado_Categoria]  WITH CHECK ADD FOREIGN KEY([id_categoria])
+REFERENCES [dbo].[Categoria] ([id_categoria])
+GO
+ALTER TABLE [dbo].[Chamado_Categoria]  WITH CHECK ADD FOREIGN KEY([id_chamado])
+REFERENCES [dbo].[Chamado] ([id_chamado])
+GO
+ALTER TABLE [dbo].[IAProcessamento]  WITH CHECK ADD FOREIGN KEY([id_chamado])
+REFERENCES [dbo].[Chamado] ([id_chamado])
+GO
+ALTER TABLE [dbo].[Interacao]  WITH CHECK ADD FOREIGN KEY([id_chamado])
+REFERENCES [dbo].[Chamado] ([id_chamado])
+GO
+ALTER TABLE [dbo].[Interacao]  WITH CHECK ADD FOREIGN KEY([id_usuario])
+REFERENCES [dbo].[Usuario] ([id_usuario])
+GO
+ALTER TABLE [dbo].[Relatorio]  WITH CHECK ADD FOREIGN KEY([id_administrador])
+REFERENCES [dbo].[Usuario] ([id_usuario])
+GO
+ALTER TABLE [dbo].[Solucao_Sugerida]  WITH CHECK ADD FOREIGN KEY([id_chamado])
+REFERENCES [dbo].[Chamado] ([id_chamado])
+GO
+ALTER TABLE [dbo].[Tecnico_Categoria]  WITH CHECK ADD FOREIGN KEY([id_categoria])
+REFERENCES [dbo].[Categoria] ([id_categoria])
+GO
+ALTER TABLE [dbo].[Tecnico_Categoria]  WITH CHECK ADD FOREIGN KEY([id_tecnico])
+REFERENCES [dbo].[Usuario] ([id_usuario])
+GO
+USE [master]
+GO
+ALTER DATABASE [SuporteTI_IA] SET  READ_WRITE 
+GO
