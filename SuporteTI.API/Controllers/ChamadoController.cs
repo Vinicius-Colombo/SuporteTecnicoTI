@@ -25,10 +25,9 @@ namespace SuporteTI.API.Controllers
         {
             var chamados = await _context.Chamados
                 .Include(c => c.IdUsuarioNavigation)
-                .Include(c => c.IdCategoria)
+                .Include(c => c.IdCategoriaNavigation)
                 .ToListAsync();
 
-            // Mapeamento manual para DTO de leitura
             var chamadosDto = chamados.Select(c => new ChamadoReadDto
             {
                 IdChamado = c.IdChamado,
@@ -36,7 +35,7 @@ namespace SuporteTI.API.Controllers
                 Descricao = c.Descricao,
                 Prioridade = c.Prioridade,
                 StatusChamado = c.StatusChamado,
-                DataAbertura = (DateTime)c.DataAbertura,
+                DataAbertura = c.DataAbertura ?? DateTime.MinValue,
                 DataFechamento = c.DataFechamento,
                 Usuario = c.IdUsuarioNavigation == null ? null : new UsuarioReadDto
                 {
@@ -48,11 +47,14 @@ namespace SuporteTI.API.Controllers
                     Cpf = c.IdUsuarioNavigation.Cpf,
                     Telefone = c.IdUsuarioNavigation.Telefone
                 },
-                Categorias = c.IdCategoria?.Select(cat => new CategoriaReadDto
+                Categoria = c.IdCategoriaNavigation != null
+                ? new CategoriaReadDto
                 {
-                    IdCategoria = cat.IdCategoria,
-                    Nome = cat.Nome
-                }).ToList()
+                    IdCategoria = c.IdCategoriaNavigation.IdCategoria,
+                    Nome = c.IdCategoriaNavigation.Nome
+                }
+                : null
+
             }).ToList();
 
             return Ok(chamadosDto);
@@ -64,7 +66,7 @@ namespace SuporteTI.API.Controllers
         {
             var chamado = await _context.Chamados
                 .Include(c => c.IdUsuarioNavigation)
-                .Include(c => c.IdCategoria)
+                .Include(c => c.IdCategoriaNavigation)
                 .FirstOrDefaultAsync(c => c.IdChamado == id);
 
             if (chamado == null)
@@ -77,7 +79,7 @@ namespace SuporteTI.API.Controllers
                 Descricao = chamado.Descricao,
                 Prioridade = chamado.Prioridade,
                 StatusChamado = chamado.StatusChamado,
-                DataAbertura = (DateTime)chamado.DataAbertura,
+                DataAbertura = chamado.DataAbertura ?? DateTime.MinValue,
                 DataFechamento = chamado.DataFechamento,
                 Usuario = chamado.IdUsuarioNavigation == null ? null : new UsuarioReadDto
                 {
@@ -89,11 +91,13 @@ namespace SuporteTI.API.Controllers
                     Cpf = chamado.IdUsuarioNavigation.Cpf,
                     Telefone = chamado.IdUsuarioNavigation.Telefone
                 },
-                Categorias = chamado.IdCategoria?.Select(cat => new CategoriaReadDto
-                {
-                    IdCategoria = cat.IdCategoria,
-                    Nome = cat.Nome
-                }).ToList()
+                Categoria = chamado.IdCategoriaNavigation != null
+                    ? new CategoriaReadDto
+                    {
+                        IdCategoria = chamado.IdCategoriaNavigation.IdCategoria,
+                        Nome = chamado.IdCategoriaNavigation.Nome
+                    }
+                    : null
             };
 
             return Ok(dto);
@@ -134,7 +138,7 @@ namespace SuporteTI.API.Controllers
                 .FirstOrDefaultAsync(c => c.Nome.ToLower() == categoria.ToLower());
 
             if (categoriaExistente != null)
-                chamado.IdCategoria = new List<Categorium> { categoriaExistente };
+                chamado.IdCategoria = categoriaExistente.IdCategoria; // ✅ 1:N agora, atribui direto
 
             await _context.SaveChangesAsync();
 
@@ -197,16 +201,18 @@ namespace SuporteTI.API.Controllers
                     Cpf = usuario.Cpf,
                     Telefone = usuario.Telefone
                 },
-                Categorias = chamado.IdCategoria?.Select(cat => new CategoriaReadDto
-                {
-                    IdCategoria = cat.IdCategoria,
-                    Nome = cat.Nome
-                }).ToList()
+                Categoria = chamado.IdCategoriaNavigation != null
+                    ? new CategoriaReadDto
+                    {
+                        IdCategoria = chamado.IdCategoriaNavigation.IdCategoria,
+                        Nome = chamado.IdCategoriaNavigation.Nome
+                    }
+                    : null
+
             };
 
             return CreatedAtAction(nameof(GetChamado), new { id = chamado.IdChamado }, readDto);
         }
-
 
         // 🔹 PUT: api/Chamado/{id}
         [HttpPut("{id}")]
@@ -216,35 +222,28 @@ namespace SuporteTI.API.Controllers
                 return BadRequest("Dados inválidos.");
 
             var chamado = await _context.Chamados
-                .Include(c => c.IdCategoria)
+                .Include(c => c.IdCategoriaNavigation)
                 .FirstOrDefaultAsync(c => c.IdChamado == id);
 
             if (chamado == null)
                 return NotFound();
 
-            // Atualiza campos permitidos
             chamado.Titulo = dto.Titulo;
             chamado.Descricao = dto.Descricao;
             chamado.Prioridade = dto.Prioridade;
             chamado.StatusChamado = dto.StatusChamado;
 
-            // Define DataFechamento se status mudou para Fechado
             if (dto.StatusChamado == "Fechado")
                 chamado.DataFechamento = DateTime.Now;
             else
                 chamado.DataFechamento = null;
 
-            // Atualiza categorias (se enviadas)
-            if (dto.IdCategorias != null)
+            // ✅ Atualiza categoria (nova estrutura 1:N)
+            if (dto.IdCategoria.HasValue)
             {
-                chamado.IdCategoria.Clear();
-                foreach (var catId in dto.IdCategorias)
-                {
-                    var categoria = await _context.Categoria.FindAsync(catId);
-                    if (categoria != null)
-                        chamado.IdCategoria.Add(categoria);
-                }
+                chamado.IdCategoria = dto.IdCategoria;
             }
+
 
             await _context.SaveChangesAsync();
             return NoContent();

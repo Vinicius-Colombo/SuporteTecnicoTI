@@ -145,10 +145,79 @@ namespace SuporteTI.Desktop.Services
             return anexos ?? new List<AnexoReadDto>();
         }
 
+        
+
+        // AREA RELACIONADA AO ADMINISTRADOR
+
+        // 🔹 Vincular técnico a uma categoria
+        public async Task VincularTecnicoCategoriaAsync(int idTecnico, int idCategoria)
+        {
+            var dto = new { IdTecnico = idTecnico, IdCategoria = idCategoria };
+            var response = await _httpClient.PostAsJsonAsync("TecnicoCategoria", dto);
+            response.EnsureSuccessStatusCode();
+        }
+
+        // 🔹 Desvincular técnico de uma categoria
+        public async Task DesvincularTecnicoCategoriaAsync(int idTecnico, int idCategoria)
+        {
+            var response = await _httpClient.DeleteAsync($"TecnicoCategoria/{idTecnico}/{idCategoria}");
+            response.EnsureSuccessStatusCode();
+        }
+
+        // 🔹 Listar categorias de um técnico (para preencher o clbCategorias)
+        public async Task<List<TecnicoCategoriaReadDto>> ObterCategoriasDoTecnicoAsync(int idTecnico)
+        {
+            var response = await _httpClient.GetAsync("TecnicoCategoria");
+            response.EnsureSuccessStatusCode();
+
+            var json = await response.Content.ReadAsStringAsync();
+            var todas = JsonSerializer.Deserialize<List<TecnicoCategoriaReadDto>>(json,
+                new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+
+            return todas.Where(tc => tc.IdTecnico == idTecnico).ToList();
+        }
 
 
+        //Métodos genéricos para comunicação com a API
+        public async Task<HttpResponseMessage> GetAsync(string endpoint)
+        {
+            return await _httpClient.GetAsync(endpoint);
+        }
 
+        public async Task<HttpResponseMessage> PostAsync<T>(string endpoint, T data)
+        {
+            return await _httpClient.PostAsJsonAsync(endpoint, data);
+        }
 
+        public async Task<HttpResponseMessage> PutAsync<T>(string endpoint, T data)
+        {
+            return await _httpClient.PutAsJsonAsync(endpoint, data);
+        }
+
+        public async Task<HttpResponseMessage> DeleteAsync(string endpoint)
+        {
+            return await _httpClient.DeleteAsync(endpoint);
+        }
+
+        // 🔹 Obtém relatório completo filtrado
+        public async Task<RelatorioResponseDto?> ObterRelatorioFiltradoAsync(RelatorioRequestDto filtros)
+        {
+            var response = await _httpClient.PostAsJsonAsync("Relatorio/filtrado", filtros);
+            if (!response.IsSuccessStatusCode)
+            {
+                var msg = await response.Content.ReadAsStringAsync();
+                MessageBox.Show($"Erro ao gerar relatório: {msg}", "Erro", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return null;
+            }
+
+            var json = await response.Content.ReadAsStringAsync();
+
+            // 🔹 Log temporário para debug (pode remover depois)
+            Console.WriteLine(json);
+
+            return JsonSerializer.Deserialize<RelatorioResponseDto>(json,
+                new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+        }
 
     }
 }

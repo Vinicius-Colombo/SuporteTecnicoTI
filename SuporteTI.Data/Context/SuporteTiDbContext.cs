@@ -121,6 +121,7 @@ public partial class SuporteTiDbContext : DbContext
                 .HasColumnName("descricao");
             entity.Property(e => e.IdTecnico).HasColumnName("id_tecnico");
             entity.Property(e => e.IdUsuario).HasColumnName("id_usuario");
+            entity.Property(e => e.IdCategoria).HasColumnName("id_categoria"); // ✅ Novo campo FK
             entity.Property(e => e.Prioridade)
                 .HasMaxLength(20)
                 .IsUnicode(false)
@@ -134,34 +135,26 @@ public partial class SuporteTiDbContext : DbContext
                 .IsUnicode(false)
                 .HasColumnName("titulo");
 
-            entity.HasOne(d => d.IdTecnicoNavigation).WithMany(p => p.ChamadoIdTecnicoNavigations)
+            // 🔹 Relacionamento com Técnico
+            entity.HasOne(d => d.IdTecnicoNavigation)
+                .WithMany(p => p.ChamadoIdTecnicoNavigations)
                 .HasForeignKey(d => d.IdTecnico)
                 .HasConstraintName("FK_Chamado_Usuario_Tecnico");
 
-            entity.HasOne(d => d.IdUsuarioNavigation).WithMany(p => p.ChamadoIdUsuarioNavigations)
+            // 🔹 Relacionamento com Usuário
+            entity.HasOne(d => d.IdUsuarioNavigation)
+                .WithMany(p => p.ChamadoIdUsuarioNavigations)
                 .HasForeignKey(d => d.IdUsuario)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK__Chamado__id_usua__3B75D760");
 
-            entity.HasMany(d => d.IdCategoria).WithMany(p => p.IdChamados)
-                .UsingEntity<Dictionary<string, object>>(
-                    "ChamadoCategorium",
-                    r => r.HasOne<Categorium>().WithMany()
-                        .HasForeignKey("IdCategoria")
-                        .OnDelete(DeleteBehavior.ClientSetNull)
-                        .HasConstraintName("FK__Chamado_C__id_ca__4316F928"),
-                    l => l.HasOne<Chamado>().WithMany()
-                        .HasForeignKey("IdChamado")
-                        .OnDelete(DeleteBehavior.ClientSetNull)
-                        .HasConstraintName("FK__Chamado_C__id_ch__4222D4EF"),
-                    j =>
-                    {
-                        j.HasKey("IdChamado", "IdCategoria").HasName("PK__Chamado___474B37DB8737D1C4");
-                        j.ToTable("Chamado_Categoria");
-                        j.IndexerProperty<int>("IdChamado").HasColumnName("id_chamado");
-                        j.IndexerProperty<int>("IdCategoria").HasColumnName("id_categoria");
-                    });
+            // ✅ Novo relacionamento 1:N com Categoria
+            entity.HasOne(d => d.IdCategoriaNavigation)
+                .WithMany(p => p.Chamados)
+                .HasForeignKey(d => d.IdCategoria)
+                .HasConstraintName("FK_Chamado_Categoria");
         });
+
 
         modelBuilder.Entity<Iaprocessamento>(entity =>
         {

@@ -24,8 +24,7 @@ namespace SuporteTI.API.Controllers
             var chamados = await _context.Chamados
                 .Include(c => c.IdUsuarioNavigation)
                 .Where(c => c.IdTecnico == idTecnico &&
-                           (EF.Functions.Like(c.StatusChamado, "Aberto") ||
-                            EF.Functions.Like(c.StatusChamado, "Em%Andamento")))
+                    (c.StatusChamado == "Aberto" || c.StatusChamado == "Em Andamento"))
                 .ToListAsync();
 
             var chamadosDto = chamados.Select(c => new ChamadoReadDto

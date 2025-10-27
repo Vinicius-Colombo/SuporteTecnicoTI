@@ -16,6 +16,7 @@ namespace SuporteTI.API.DTOs
         public int IdUsuario { get; set; }
 
         // ids de categorias (opcional — IA pode preencher depois)
-        public List<int>? IdCategorias { get; set; }
+        public string Categoria { get; set; } = string.Empty;
+
     }
 }

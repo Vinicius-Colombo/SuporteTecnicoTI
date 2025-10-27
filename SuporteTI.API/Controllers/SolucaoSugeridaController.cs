@@ -70,16 +70,16 @@ namespace SuporteTI.API.Controllers
 
             chamado.Prioridade = prioridade;
 
-            // 3️⃣ Associa categoria se existir no banco
+            // 3️⃣ Associa categoria sugerida
             var categoriaExistente = await _context.Categoria
                 .FirstOrDefaultAsync(c => c.Nome.ToLower() == categoria.ToLower());
 
             if (categoriaExistente != null)
-                chamado.IdCategoria = new List<Categorium> { categoriaExistente };
+                chamado.IdCategoria = categoriaExistente.IdCategoria; // ✅ agora 1:N
 
             await _context.SaveChangesAsync();
 
-            // 4️⃣ Registra o processamento IA
+            // 4️⃣ Registra o processamento da IA
             var processamento = new Iaprocessamento
             {
                 IdChamado = chamado.IdChamado,
@@ -122,11 +122,14 @@ namespace SuporteTI.API.Controllers
                     Cpf = usuario.Cpf,
                     Telefone = usuario.Telefone
                 },
-                Categorias = chamado.IdCategoria?.Select(cat => new CategoriaReadDto
-                {
-                    IdCategoria = cat.IdCategoria,
-                    Nome = cat.Nome
-                }).ToList()
+                Categoria = chamado.IdCategoriaNavigation != null
+                    ? new CategoriaReadDto
+                    {
+                        IdCategoria = chamado.IdCategoriaNavigation.IdCategoria,
+                        Nome = chamado.IdCategoriaNavigation.Nome
+                    }
+                    : null
+
             };
 
             return CreatedAtAction(nameof(Listar), new { chamadoId = chamado.IdChamado }, readDto);
@@ -152,7 +155,7 @@ namespace SuporteTI.API.Controllers
         {
             var solucao = await _context.SolucaoSugerida
                 .Include(s => s.IdChamadoNavigation)
-                .ThenInclude(c => c.IdCategoria)
+                .ThenInclude(c => c.IdCategoriaNavigation)
                 .FirstOrDefaultAsync(s => s.IdSolucao == id);
 
             if (solucao == null)
@@ -162,15 +165,15 @@ namespace SuporteTI.API.Controllers
             if (chamado == null)
                 return NotFound("Chamado não encontrado.");
 
-            // 🔹 Marca como rejeitada (mas mantém o chamado em 'Aberto')
+            // 🔹 Marca como rejeitada
             solucao.Aceita = false;
 
-            // 🔹 Verifica categoria do chamado
-            var categoria = chamado.IdCategoria?.FirstOrDefault();
+            // 🔹 Busca categoria do chamado
+            var categoria = chamado.IdCategoriaNavigation;
             if (categoria == null)
                 return BadRequest("Não foi possível identificar a categoria do chamado.");
 
-            // 🔹 Busca todos os técnicos vinculados à categoria
+            // 🔹 Busca técnicos vinculados à categoria
             var tecnicos = await _context.TecnicoCategorias
                 .Where(tc => tc.IdCategoria == categoria.IdCategoria)
                 .Select(tc => tc.IdTecnico)
@@ -201,7 +204,6 @@ namespace SuporteTI.API.Controllers
 
             await _context.SaveChangesAsync();
 
-            // 🔹 Retorna DTO atualizado
             var dto = new SolucaoSugeridaReadDto
             {
                 IdSolucao = solucao.IdSolucao,
@@ -217,7 +219,5 @@ namespace SuporteTI.API.Controllers
                 solucao = dto
             });
         }
-
-
     }
 }

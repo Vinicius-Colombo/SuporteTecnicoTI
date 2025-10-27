@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace SuporteTI.API.DTOs
+namespace SuporteTI.Desktop.DTOs
 {
     public class UsuarioCreateDto
     {

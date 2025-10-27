@@ -158,11 +158,6 @@ namespace SuporteTI.Desktop
             }
         }
 
-
-        private void lblTitulo_Click(object sender, EventArgs e)
-        {
-
-        }
         private void AbrirTelaPorTipo(LoginResponseDto result)
         {
             if (result.Tipo.Equals("Administrador", StringComparison.OrdinalIgnoreCase))

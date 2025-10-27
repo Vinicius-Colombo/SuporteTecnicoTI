@@ -9,6 +9,7 @@
         public string? StatusChamado { get; set; }
         public DateTime DataAbertura { get; set; }
         public UsuarioReadDto? Usuario { get; set; }
-        public List<CategoriaReadDto>? Categorias { get; set; }
+        public CategoriaReadDto? Categoria { get; set; }
+
     }
 }

@@ -12,6 +12,7 @@
         public UsuarioReadDto? Usuario { get; set; }
         public string NomeCliente { get; set; } = string.Empty;
         public string NomeTecnico { get; set; } = string.Empty;
-        public List<CategoriaReadDto>? Categorias { get; set; }
+        public CategoriaReadDto? Categoria { get; set; }
+
     }
 }

@@ -8,6 +8,7 @@
         public DateTime DataEnvio { get; set; }
         public string TituloChamado { get; set; } = string.Empty;
 
+
         // 🔹 Novo campo — conteúdo do arquivo (imagem, pdf, etc)
         public byte[]? Conteudo { get; set; }
     }

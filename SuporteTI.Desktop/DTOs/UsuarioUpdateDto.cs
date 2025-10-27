@@ -1,15 +1,22 @@
-﻿namespace SuporteTI.Desktop.DTOs
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace SuporteTI.Desktop.DTOs
 {
-    public class UsuarioReadDto
+    public class UsuarioUpdateDto
     {
+        [Required]
         public int IdUsuario { get; set; }
+
+        [Required, StringLength(100)]
         public string Nome { get; set; } = string.Empty;
-        public string Email { get; set; } = string.Empty;
-        public string Tipo { get; set; } = string.Empty;
-        public bool Ativo { get; set; }
+
+        [EmailAddress, StringLength(100)]
+        public string? Email { get; set; }
+
         public string? Cpf { get; set; }
         public string? Telefone { get; set; }
         public string? Endereco { get; set; }
         public DateTime? DataNascimento { get; set; }
+        public bool? Ativo { get; set; }
     }
 }

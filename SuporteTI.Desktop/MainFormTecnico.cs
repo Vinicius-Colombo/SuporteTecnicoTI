@@ -288,25 +288,40 @@ namespace SuporteTI.Desktop
         }
 
 
-        private async Task btnEncerrar_Click(object sender, EventArgs e)
+        private async void btnEncerrar_Click(object? sender, EventArgs e)
         {
             if (lvChamados.SelectedItems.Count == 0)
             {
-                MessageBox.Show("Selecione um chamado para encerrar.", "Aviso", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show("Selecione um chamado para encerrar.", "Aviso",
+                                MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
 
-            var chamado = (ChamadoReadDto)lvChamados.SelectedItems[0].Tag;
-            var formEncerrar = new EncerrarChamadoForm(chamado);
-
-            if (formEncerrar.ShowDialog() == DialogResult.OK)
+            try
             {
-                // Atualiza a lista após encerramento
-                await CarregarChamadosAsync();
-                LimparDetalhesChamado();
-                lvChamados.SelectedItems.Clear();
+                var chamado = (ChamadoReadDto)lvChamados.SelectedItems[0].Tag;
+
+                using var formEncerrar = new EncerrarChamadoForm(chamado);
+                if (formEncerrar.ShowDialog(this) == DialogResult.OK)
+                {
+                    btnEncerrar.Enabled = false;
+
+                    await CarregarChamadosAsync(); // recarrega a lista
+                    LimparDetalhesChamado();       // limpa labels/histórico
+                    lvChamados.SelectedItems.Clear();
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Erro ao encerrar: {ex.Message}", "Erro",
+                                MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            finally
+            {
+                btnEncerrar.Enabled = true;
             }
         }
+
 
         private void PbPerfil_Click(object? sender, EventArgs e)
         {

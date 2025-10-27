@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace SuporteTI.API.DTOs
+namespace SuporteTI.Desktop.DTOs
 {
     public class RelatorioRequestDto
     {

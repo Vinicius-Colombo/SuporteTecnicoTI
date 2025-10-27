@@ -54,7 +54,11 @@ namespace SuporteTI.API.Controllers
                 Tipo = usuario.Tipo,
                 Ativo = usuario.Ativo ?? false,
                 Cpf = usuario.Cpf,
-                Telefone = usuario.Telefone
+                Telefone = usuario.Telefone,
+                Endereco = usuario.Endereco,
+                DataNascimento = usuario.DataNascimento.HasValue
+                    ? usuario.DataNascimento.Value.ToDateTime(new TimeOnly(0, 0))
+                    : null
             });
         }
 
@@ -62,63 +66,94 @@ namespace SuporteTI.API.Controllers
         [HttpPost]
         public async Task<ActionResult<UsuarioReadDto>> PostUsuario([FromBody] UsuarioCreateDto dto)
         {
-            if (!string.IsNullOrWhiteSpace(dto.Cpf) && !CpfValidator.IsValid(dto.Cpf))
-                return BadRequest("CPF inválido.");
-
-            var usuario = new Usuario
+            try
             {
-                Nome = dto.Nome,
-                Email = dto.Email,
-                Senha = dto.Senha, // Em produção: aplicar hash!
-                Tipo = dto.Tipo,
-                Cpf = dto.Cpf,
-                Telefone = dto.Telefone,
-                Endereco = dto.Endereco,
-                DataNascimento = dto.DataNascimento, // DateTime? → DateTime? (sem conversão)
-                Ativo = true
-            };
+                if (!ModelState.IsValid)
+                    return BadRequest("Os dados informados são inválidos.");
 
-            _context.Usuarios.Add(usuario);
-            await _context.SaveChangesAsync();
+                // 🔹 Validação de CPF, se informado
+                if (!string.IsNullOrWhiteSpace(dto.Cpf) && !CpfValidator.IsValid(dto.Cpf))
+                    return BadRequest("CPF inválido.");
 
-            return CreatedAtAction(nameof(GetUsuario), new { id = usuario.IdUsuario }, new UsuarioReadDto
+                // 🔹 Gera uma senha automática de 6 dígitos numéricos
+                var random = new Random();
+                var senhaGerada = random.Next(100000, 999999).ToString();
+
+                // 🔹 Cria o objeto usuário com a senha gerada
+                var usuario = new Usuario
+                {
+                    Nome = dto.Nome.Trim(),
+                    Email = dto.Email.Trim(),
+                    Senha = senhaGerada, // salva a senha gerada no banco
+                    Tipo = dto.Tipo,
+                    Cpf = dto.Cpf,
+                    Telefone = dto.Telefone,
+                    Endereco = dto.Endereco,
+                    DataNascimento = dto.DataNascimento.HasValue
+                        ? DateOnly.FromDateTime(dto.DataNascimento.Value)
+                        : null,
+                    Ativo = true
+                };
+
+                _context.Usuarios.Add(usuario);
+                await _context.SaveChangesAsync();
+
+                // 🔹 (Opcional futuramente) Envio de e-mail comentado
+                /*
+                await _emailService.EnviarEmailAsync(usuario.Email, "Conta criada com sucesso",
+                    $"Olá {usuario.Nome}, sua conta foi criada com sucesso.\nSua senha de acesso é: {senhaGerada}");
+                */
+
+                // 🔹 Retorno incluindo a senha gerada (somente para testes)
+                return Ok(new
+                {
+                    usuario.IdUsuario,
+                    usuario.Nome,
+                    usuario.Email,
+                    usuario.Tipo,
+                    usuario.Ativo,
+                    usuario.Cpf,
+                    usuario.Telefone,
+                    SenhaGerada = senhaGerada
+                });
+            }
+            catch (Exception ex)
             {
-                IdUsuario = usuario.IdUsuario,
-                Nome = usuario.Nome,
-                Email = usuario.Email,
-                Tipo = usuario.Tipo,
-                Ativo = (bool)usuario.Ativo,
-                Cpf = usuario.Cpf,
-                Telefone = usuario.Telefone
-            });
+                return StatusCode(500, $"Erro ao criar usuário: {ex.Message}");
+            }
         }
+
 
         // PUT: api/Usuario/5
         [HttpPut("{id}")]
         public async Task<IActionResult> PutUsuario(int id, [FromBody] UsuarioUpdateDto dto)
         {
-            if (id != dto.IdUsuario)
-                return BadRequest("O ID informado não confere.");
+            if (id != dto.IdUsuario) return BadRequest("Id do caminho difere do corpo.");
 
             var usuario = await _context.Usuarios.FindAsync(id);
-            if (usuario == null)
-                return NotFound();
+            if (usuario == null) return NotFound("Usuário não encontrado.");
 
-            if (!string.IsNullOrWhiteSpace(dto.Cpf) && !CpfValidator.IsValid(dto.Cpf))
-                return BadRequest("CPF inválido.");
+            // Atualiza apenas se o DTO trouxe valor (preserva no banco se vier null)
+            if (!string.IsNullOrWhiteSpace(dto.Nome)) usuario.Nome = dto.Nome.Trim();
+            if (!string.IsNullOrWhiteSpace(dto.Email)) usuario.Email = dto.Email.Trim();
+            if (dto.Cpf != null) usuario.Cpf = dto.Cpf;
+            if (dto.Telefone != null) usuario.Telefone = dto.Telefone;
 
-            // Atualiza somente os campos que foram enviados
-            usuario.Nome = dto.Nome;
-            if (!string.IsNullOrEmpty(dto.Email)) usuario.Email = dto.Email;
-            usuario.Cpf = dto.Cpf ?? usuario.Cpf;
-            usuario.Telefone = dto.Telefone ?? usuario.Telefone;
+            // 👇 Endereco preservado se vier null
+            if (dto.Endereco != null) usuario.Endereco = dto.Endereco;
 
-            if (dto.Ativo.HasValue)
-                usuario.Ativo = dto.Ativo.Value;
+            // 👇 Converte DateTime? → DateOnly? (e preserva se veio null)
+            if (dto.DataNascimento.HasValue)
+                usuario.DataNascimento = DateOnly.FromDateTime(dto.DataNascimento.Value);
 
+            if (dto.Ativo.HasValue) usuario.Ativo = dto.Ativo.Value;
+
+            _context.Usuarios.Update(usuario);
             await _context.SaveChangesAsync();
+
             return NoContent();
         }
+
 
         // DELETE: api/Usuario/5
         [HttpDelete("{id}")]

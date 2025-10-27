@@ -3,13 +3,13 @@
     public class LoginResponseDto
     {
         public int IdUsuario { get; set; }
-        public string Nome { get; set; } = string.Empty;
-        public string Email { get; set; } = string.Empty;
-        public string Tipo { get; set; } = string.Empty;
+        public string Nome { get; set; } = "";
+        public string Email { get; set; } = "";
+        public string? Tipo { get; set; }
         public string? Cpf { get; set; }
         public string? Telefone { get; set; }
-
-        // Se depois usar JWT, pode adicionar aqui:
-        // public string Token { get; set; } = string.Empty;
+        public string? Endereco { get; set; }
+        public DateTime? DataNascimento { get; set; }
+        public string? Token { get; set; }
     }
 }

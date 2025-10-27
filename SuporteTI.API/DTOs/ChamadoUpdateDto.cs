@@ -15,6 +15,7 @@ namespace SuporteTI.API.DTOs
         [Required]
         public string StatusChamado { get; set; } = "Aberto";
 
-        public List<int>? IdCategorias { get; set; } // substitui categorias se enviado
+        public int? IdCategoria { get; set; } // substitui categoria se enviada
+
     }
 }

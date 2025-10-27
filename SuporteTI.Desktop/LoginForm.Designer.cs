@@ -61,7 +61,6 @@
             lblTitulo.TabIndex = 0;
             lblTitulo.Text = "Login - Suporte Técnico";
             lblTitulo.TextAlign = ContentAlignment.TopCenter;
-            lblTitulo.Click += lblTitulo_Click;
             // 
             // lblSenha
             // 

@@ -35,6 +35,28 @@ namespace SuporteTI.API.Controllers
             return Ok(vinculos);
         }
 
+        [HttpGet("{idTecnico}")]
+        public async Task<ActionResult<IEnumerable<TecnicoCategoriaReadDto>>> GetPorTecnico(int idTecnico)
+        {
+            var vinculos = await _context.TecnicoCategorias
+                .Include(tc => tc.Categoria)
+                .Where(tc => tc.IdTecnico == idTecnico)
+                .Select(tc => new TecnicoCategoriaReadDto
+                {
+                    IdTecnico = tc.IdTecnico,
+                    NomeTecnico = tc.Tecnico.Nome,
+                    IdCategoria = tc.IdCategoria,
+                    NomeCategoria = tc.Categoria.Nome
+                })
+                .ToListAsync();
+
+            if (vinculos == null || vinculos.Count == 0)
+                return NotFound("Nenhum vínculo encontrado para este técnico.");
+
+            return Ok(vinculos);
+        }
+
+
         // 🔹 POST: api/TecnicoCategoria
         [HttpPost]
         public async Task<ActionResult> Vincular([FromBody] TecnicoCategoriaCreateDto dto)

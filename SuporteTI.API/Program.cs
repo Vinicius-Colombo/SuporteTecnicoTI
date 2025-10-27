@@ -19,7 +19,6 @@ builder.Services.AddSwaggerGen();
 builder.Configuration.AddUserSecrets<Program>();
 builder.Services.AddScoped<SuporteTI.API.Services.IAService>();
 
-
 var app = builder.Build();
 
 // Configure the HTTP request pipeline

@@ -10,5 +10,6 @@ namespace SuporteTI.Desktop.DTOs
     {
         public int IdCategoria { get; set; }
         public string Nome { get; set; } = string.Empty;
+
     }
 }

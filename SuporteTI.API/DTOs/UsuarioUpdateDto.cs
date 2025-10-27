@@ -15,6 +15,8 @@ namespace SuporteTI.API.DTOs
 
         public string? Cpf { get; set; }
         public string? Telefone { get; set; }
+        public string? Endereco { get; set; }
+        public DateTime? DataNascimento { get; set; }
         public bool? Ativo { get; set; }
     }
 }

@@ -65,8 +65,9 @@ namespace SuporteTI.API.Controllers
             {
                 new Claim(ClaimTypes.NameIdentifier, usuario.IdUsuario.ToString()),
                 new Claim(ClaimTypes.Email, usuario.Email),
-                new Claim(ClaimTypes.Role, usuario.Tipo)
-    };
+                new Claim(ClaimTypes.Role, usuario.Tipo),
+                new Claim(ClaimTypes.Name, usuario.Nome),
+            };
 
             // ✅ Gera o token
             var key = Encoding.UTF8.GetBytes(_configuration["Jwt:Key"] ?? string.Empty);
@@ -88,6 +89,8 @@ namespace SuporteTI.API.Controllers
                 Tipo = usuario.Tipo,
                 Cpf = usuario.Cpf,
                 Telefone = usuario.Telefone,
+                Endereco = usuario.Endereco,
+                DataNascimento = usuario.DataNascimento,
                 Token = new JwtSecurityTokenHandler().WriteToken(token)
             });
 

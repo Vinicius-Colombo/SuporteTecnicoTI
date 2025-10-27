@@ -66,30 +66,39 @@ namespace SuporteTI.Desktop
             };
             pnlTopo.Controls.Add(lblTitulo);
 
+            // 🔹 Move o painel principal para baixo do topo
+            pnlPerfil.Top = pnlTopo.Bottom + 5;
+            pnlPerfil.Height = Height - pnlTopo.Height - 10;
+
             // Estilo dos labels
-            foreach (var label in new[] { lblNome, lblEmail, lblCpf, lblTelefone })
+            foreach (var label in new[] { lblNome, lblEmail, })
             {
                 label.Font = new Font("Segoe UI", 9.5F);
                 label.ForeColor = Color.DimGray;
                 label.Padding = new Padding(10, 5, 10, 0);
             }
 
-            // Botão sair
+            // 🔹 Botão sair fixo na parte inferior
+            btnSair.Anchor = AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+            btnSair.Top = pnlPerfil.Height - btnSair.Height - 10;
+            btnSair.Left = 10;
+            btnSair.Width = pnlPerfil.Width - 20;
             btnSair.BackColor = SystemColors.Highlight;
             btnSair.FlatStyle = FlatStyle.Flat;
             btnSair.FlatAppearance.BorderSize = 0;
             btnSair.ForeColor = Color.White;
             btnSair.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
-            btnSair.Region = Region.FromHrgn(CreateRoundRectRgn(0, 0, btnSair.Width, btnSair.Height, 5, 5));
+            btnSair.BringToFront();
         }
+
 
         private void CarregarDadosUsuario()
         {
             lblNome.Text = $"Nome: {_usuario.Nome}";
             lblEmail.Text = $"E-mail: {_usuario.Email}";
-            lblCpf.Text = $"CPF: {_usuario.Cpf}";
-            lblTelefone.Text = $"Telefone: {_usuario.Telefone ?? "-"}";
         }
+
+
 
         private void BtnSair_Click(object? sender, EventArgs e)
         {
@@ -103,10 +112,10 @@ namespace SuporteTI.Desktop
 
             if (confirm == DialogResult.Yes)
             {
-                // Fecha a tela principal (MainFormTecnico)
+                // Fecha a tela principal
                 foreach (Form form in Application.OpenForms.Cast<Form>().ToList())
                 {
-                    if (form is MainFormTecnico)
+                    if (form is MainFormTecnico || form is MainFormAdmin)
                         form.Close();
                 }
 
@@ -124,5 +133,10 @@ namespace SuporteTI.Desktop
         private static extern IntPtr CreateRoundRectRgn(
             int nLeftRect, int nTopRect, int nRightRect, int nBottomRect,
             int nWidthEllipse, int nHeightEllipse);
+
+        private void PerfilMiniForm_Load(object sender, EventArgs e)
+        {
+
+        }
     }
 }
