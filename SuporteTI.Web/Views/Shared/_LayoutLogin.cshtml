@@ -1,0 +1,90 @@
+﻿<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>@ViewData["Title"] - Suporte Técnico</title>
+
+    <style>
+        /* ====== Fundo e centralização ====== */
+        body {
+            margin: 0;
+            height: 100vh;
+            background-color: #0b66c2;
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* ====== Card central ====== */
+        .card-login {
+            background: #fff;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            padding: 40px;
+            width: 340px;
+            display: flex;
+            flex-direction: column;
+            align-items: stretch; /* garante mesmo espaço em ambos os lados */
+        }
+
+        h2 {
+            margin-bottom: 25px;
+            color: #111;
+            text-align: center;
+        }
+
+        label {
+            display: block;
+            margin-top: 12px;
+            font-weight: bold;
+            color: #222;
+            text-align: left;
+        }
+
+        input[type="text"],
+        input[type="password"] {
+            width: 100%;
+            padding: 10px 12px;
+            margin-top: 6px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 14px;
+            box-sizing: border-box;
+        }
+
+        /* ====== Botão ====== */
+        button {
+            margin-top: 22px;
+            padding: 12px;
+            background-color: #007bff;
+            border: none;
+            border-radius: 6px;
+            color: white;
+            font-size: 15px;
+            cursor: pointer;
+            align-self: center;
+            width: 100%; /* ocupa a largura exata do input */
+            transition: background-color 0.3s, transform 0.1s ease-in-out;
+        }
+
+            button:hover {
+                background-color: #0056b3;
+                transform: scale(1.02);
+            }
+
+        p.description {
+            margin-top: 18px;
+            color: #666;
+            font-size: 13px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    @RenderBody()
+
+    @RenderSection("Scripts", required: false)
+</body>
+</html>

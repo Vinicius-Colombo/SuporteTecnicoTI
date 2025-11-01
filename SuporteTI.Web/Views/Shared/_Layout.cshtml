@@ -1,50 +1,471 @@
-﻿<!DOCTYPE html>
-<html lang="en">
+﻿@inject Microsoft.AspNetCore.Http.IHttpContextAccessor HttpContextAccessor
+
+<!DOCTYPE html>
+<html lang="pt-br">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - SuporteTI.Web</title>
-    <script type="importmap"></script>
-    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
-    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
-    <link rel="stylesheet" href="~/SuporteTI.Web.styles.css" asp-append-version="true" />
+    <title>@ViewData["Title"] - Suporte Técnico</title>
+
+    <style>
+        :root {
+            --brand: Highlight;
+            --brand-fallback: #1e90ff;
+            --brand-contrast: #fff;
+        }
+
+        .bg-brand {
+            background: var(--brand, var(--brand-fallback));
+            color: var(--brand-contrast);
+        }
+
+        .btn-brand {
+            background: var(--brand, var(--brand-fallback));
+            color: var(--brand-contrast);
+            border: 0;
+            border-radius: 4px;
+            padding: 10px 16px;
+            cursor: pointer;
+        }
+
+            .btn-brand:hover {
+                filter: brightness(0.92);
+            }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f9f9f9;
+        }
+
+        header.appbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 16px;
+        }
+
+        .appbar .title {
+            font-weight: 600;
+        }
+
+        .appbar .right {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        /* Botões de ícone e badge */
+        .icon-btn {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, .15);
+            color: #fff;
+            border: none;
+            cursor: pointer;
+        }
+
+            .icon-btn:hover {
+                background: rgba(255, 255, 255, .25);
+            }
+
+        .badge {
+            position: absolute;
+            top: 2px;
+            right: 2px;
+            min-width: 16px;
+            height: 16px;
+            border-radius: 8px;
+            background: #ff3b30;
+            color: #fff;
+            font-size: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 4px;
+        }
+
+        /* Dropdown perfil */
+        .profile {
+            position: relative;
+        }
+
+        .profile-btn {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: transparent;
+            border: 0;
+            color: #fff;
+            cursor: pointer;
+        }
+
+        .avatar {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: #fff;
+            color: #333;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+        }
+
+        .menu {
+            position: absolute;
+            right: 0;
+            top: 42px;
+            background: #fff;
+            color: #333;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            min-width: 180px;
+            box-shadow: 0 6px 18px rgba(0, 0, 0, .08);
+            display: none;
+            z-index: 5;
+        }
+
+            .menu a,
+            .menu button {
+                display: block;
+                width: 100%;
+                text-align: left;
+                padding: 10px 12px;
+                background: #fff;
+                border: 0;
+                cursor: pointer;
+                color: #333;
+                text-decoration: none;
+            }
+
+                .menu a:hover,
+                .menu button:hover {
+                    background: #f3f6fb;
+                }
+
+        .main {
+            display: flex;
+            height: calc(100vh - 56px);
+            background: #fff;
+        }
+
+        nav.sidenav {
+            width: 220px;
+            background: #f4f4f4;
+            border-right: 1px solid #ddd;
+            padding-top: 20px;
+        }
+
+            nav.sidenav a {
+                display: block;
+                padding: 12px 18px;
+                color: #333;
+                text-decoration: none;
+                border-left: 4px solid transparent;
+            }
+
+                nav.sidenav a.active {
+                    background: var(--brand, var(--brand-fallback));
+                    color: #fff;
+                    border-left-color: var(--brand, var(--brand-fallback));
+                    font-weight: 600;
+                }
+
+        main.content {
+            flex: 1;
+            padding: 20px;
+            overflow: auto;
+        }
+
+        aside.sidebar {
+            width: 320px;
+            border-left: 1px solid #ddd;
+            background: #f8faff;
+            padding: 20px;
+            overflow: auto;
+        }
+
+        .card-chamado {
+            background: #fff;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 12px;
+            position: relative;
+        }
+
+        .dot-alert {
+            width: 10px;
+            height: 10px;
+            border-radius: 5px;
+            background: #ff9500;
+            position: absolute;
+            right: 12px;
+            top: 12px;
+        }
+
+        /* ====== Botão "Sair" (menu superior) ====== */
+        .menu .btn-sair {
+            display: block;
+            width: 100%;
+            padding: 12px 0;
+            background: #d9534f;
+            color: #fff;
+            border: none;
+            border-radius: 0 0 8px 8px;
+            font-weight: bold;
+            cursor: pointer;
+            text-align: center;
+            transition: background 0.3s ease;
+        }
+
+            .menu .btn-sair:hover {
+                background: #c9302c;
+            }
+
+    </style>
+
+    @RenderSection("Styles", required: false)
 </head>
 <body>
-    <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
-            <div class="container-fluid">
-                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">SuporteTI.Web</a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
-                        aria-expanded="false" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
+    <header class="appbar bg-brand">
+        <div class="title">Suporte Técnico</div>
+
+        <div class="right">
+
+            <!-- 🔔 Notificações -->
+            <div class="notif-container" style="position:relative;">
+                <button class="icon-btn" id="btnNotif" title="Notificações">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12 24a2.5 2.5 0 0 0 2.45-2h-4.9A2.5 2.5 0 0 0 12 24zm6.36-6V11a6.36 6.36 0 0 0-5.36-6.27V4a1 1 0 1 0-2 0v.73A6.36 6.36 0 0 0 5.64 11v7L4 20v1h16v-1l-1.64-2z" />
+                    </svg>
+                    <span class="badge" id="notifCount" style="display:none">0</span>
                 </button>
-                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
-                    <ul class="navbar-nav flex-grow-1">
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
-                        </li>
+
+                <!-- Menu de notificações -->
+                <div id="notifMenu" style="
+                    display:none; position:absolute; right:0; top:40px;
+                    background:#fff; color:#333; border-radius:8px; box-shadow:0 4px 12px rgba(0,0,0,0.15);
+                    width:280px; padding:10px; z-index:10;">
+                    <h4 style="margin:0 0 10px; font-size:15px; color:#0d6efd;">Notificações</h4>
+                    <ul id="notifList" style="list-style:none; margin:0; padding:0; max-height:300px; overflow:auto;">
+                        <li style="color:#666; text-align:center;">Nenhuma notificação</li>
                     </ul>
                 </div>
             </div>
-        </nav>
+
+            <!-- Perfil -->
+            <div class="profile">
+                <button class="profile-btn" id="btnProfile">
+                    @{
+                        var nomeUsuario = HttpContextAccessor?.HttpContext?.Session?.GetString("Nome");
+                        var inicial = !string.IsNullOrEmpty(nomeUsuario) ? nomeUsuario[..1].ToUpper() : "U";
+                    }
+                    <div class="avatar">@inicial</div>
+                    <span>@(nomeUsuario ?? "Cliente")</span>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="#fff">
+                        <path d="M7 10l5 5 5-5z" />
+                    </svg>
+                </button>
+                <div class="menu" id="menuProfile">
+                    <button class="btn-sair" onclick="location.href='@Url.Action("Logout", "AuthWeb")'">Sair</button>
+                </div>
+            </div>
+        </div>
     </header>
-    <div class="container">
-        <main role="main" class="pb-3">
+
+    <div class="main">
+        <nav class="sidenav">
+            <a asp-controller="Cliente" asp-action="Novo" class="@(ViewBag.Nav == "Novo" ? "active" : "")">Novo Chamado</a>
+            <a asp-controller="Cliente" asp-action="Historico" class="@(ViewBag.Nav == "Historico" ? "active" : "")">Histórico de Chamados</a>
+            <a asp-controller="Cliente" asp-action="Perfil" class="@(ViewBag.Nav == "Perfil" ? "active" : "")">Perfil</a>
+        </nav>
+
+        <main class="content">
             @RenderBody()
         </main>
+
+        <aside class="sidebar">
+            <h3>Chamados Recentes</h3>
+            <div id="recentes-container">
+                <p style="color:gray;">Carregando...</p>
+            </div>
+        </aside>
     </div>
 
-    <footer class="border-top footer text-muted">
-        <div class="container">
-            &copy; 2025 - SuporteTI.Web - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
-        </div>
-    </footer>
-    <script src="~/lib/jquery/dist/jquery.min.js"></script>
-    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="~/js/site.js" asp-append-version="true"></script>
-    @await RenderSectionAsync("Scripts", required: false)
+    <script>
+        // ==========================
+        // 👤 Menu do perfil
+        // ==========================
+        const btnProfile = document.getElementById('btnProfile');
+        const menuProfile = document.getElementById('menuProfile');
+        if (btnProfile) {
+            btnProfile.addEventListener('click', () => {
+                menuProfile.style.display = (menuProfile.style.display === 'block') ? 'none' : 'block';
+            });
+            document.addEventListener('click', (e) => {
+                if (!menuProfile.contains(e.target) && !btnProfile.contains(e.target))
+                    menuProfile.style.display = 'none';
+            });
+        }
+    </script>
+    <script>
+        // ==========================
+        // 🔔 Notificações unificadas (mensagens + avaliações)
+        // ==========================
+        const btnNotif = document.getElementById('btnNotif');
+        const notifMenu = document.getElementById('notifMenu');
+        const notifCount = document.getElementById('notifCount');
+        const notifList = document.getElementById('notifList');
+
+        if (btnNotif) {
+            btnNotif.addEventListener('click', () => {
+                const visible = notifMenu.style.display === 'block';
+                notifMenu.style.display = visible ? 'none' : 'block';
+            });
+            document.addEventListener('click', (e) => {
+                if (!notifMenu.contains(e.target) && !btnNotif.contains(e.target))
+                    notifMenu.style.display = 'none';
+            });
+        }
+
+        function setNotifCount(n) {
+            if (!notifCount) return;
+            notifCount.textContent = n > 0 ? n : "";
+            notifCount.style.display = n > 0 ? 'flex' : 'none';
+        }
+
+        // Guarda mensagens vistas (chave: "<idChamado>-<idInteracao>")
+        function getMsgsVistas() {
+            try { return JSON.parse(localStorage.getItem("msgsVistas") || "[]"); }
+            catch { return []; }
+        }
+        function addMsgVista(key) {
+            const lista = getMsgsVistas();
+            if (!lista.includes(key)) {
+                lista.push(key);
+                localStorage.setItem("msgsVistas", JSON.stringify(lista));
+            }
+        }
+
+        // Guarda chamados avaliados
+        function getChamadosAvaliados() {
+            try { return JSON.parse(localStorage.getItem("chamadosAvaliados") || "[]"); }
+            catch { return []; }
+        }
+        function addChamadoAvaliado(id) {
+            const lista = getChamadosAvaliados();
+            if (!lista.includes(id)) {
+                lista.push(id);
+                localStorage.setItem("chamadosAvaliados", JSON.stringify(lista));
+            }
+        }
+
+        // 🔔 Buscar notificações do backend
+        async function carregarNotificacoes() {
+            try {
+                const [respMsg, respAvaliacao] = await Promise.all([
+                    fetch('/Cliente/NotificacoesMensagens', { cache: 'no-store' }),
+                    fetch('/Cliente/Notificacoes', { cache: 'no-store' })
+                ]);
+
+                if (!respMsg.ok || !respAvaliacao.ok) return;
+
+                const msgs = await respMsg.json();
+                const avaliacoes = await respAvaliacao.json();
+
+                const vistas = getMsgsVistas();
+                const avaliados = getChamadosAvaliados();
+                const listaNotifs = [];
+
+                // Mensagens do técnico
+                (msgs || []).forEach(n => {
+                    const key = `${n.idChamado}-${n.idInteracao}`;
+                    if (!vistas.includes(key)) {
+                        listaNotifs.push({
+                            tipo: "mensagem",
+                            id: key,
+                            titulo: n.titulo,
+                            mensagem: n.mensagem,
+                            url: `/Cliente/Chat/${n.idChamado}`
+                        });
+                    }
+                });
+
+                // Chamados resolvidos/encerrados sem avaliação
+                (avaliacoes || []).forEach(n => {
+                    const idChamado = n.idChamado || n.IdChamado;
+                    if (!avaliados.includes(String(idChamado))) {
+                        listaNotifs.push({
+                            tipo: "avaliacao",
+                            id: String(idChamado),
+                            titulo: n.titulo || `Chamado #${idChamado} ${n.status || "Resolvido"}`,
+                            mensagem: n.mensagem || "Avalie o atendimento.",
+                            url: `/Cliente/Chat/${idChamado}?avaliar=true`
+                        });
+                    }
+                });
+
+                // Exibir
+                if (listaNotifs.length > 0) {
+                    notifList.innerHTML = listaNotifs.slice(0, 1).map(n => `
+                        <li style="margin-bottom:6px;border-bottom:1px solid #eee;padding-bottom:6px;">
+                            <a href="${n.url}"
+                               onclick="marcarNotificacaoVista('${n.tipo}','${n.id}')"
+                               style="color:#000;text-decoration:none;display:block;">
+                               <strong>${n.titulo}</strong><br/>
+                               <small style="color:#555;">${n.mensagem}</small>
+                            </a>
+                        </li>`).join("");
+                    setNotifCount(1);
+                } else {
+                    notifList.innerHTML = '<li style="color:#666;text-align:center;">Nenhuma notificação</li>';
+                    setNotifCount(0);
+                }
+
+            } catch (e) {
+                console.warn("Erro ao carregar notificações:", e);
+            }
+        }
+
+        // ✅ Marca como lida
+        function marcarNotificacaoVista(tipo, id) {
+            if (tipo === "mensagem") addMsgVista(id);
+            else if (tipo === "avaliacao") addChamadoAvaliado(id);
+            setNotifCount(0);
+        }
+
+        // ⏱️ Executa ao carregar e a cada 30s
+        window.addEventListener("load", carregarNotificacoes);
+        setInterval(carregarNotificacoes, 30000);
+    </script>
+
+
+
+    <script>
+        async function carregarRecentes() {
+            try {
+                const resp = await fetch('/Cliente/ChamadosRecentes', { cache: 'no-store' });
+                if (!resp.ok) return;
+                const html = await resp.text();
+                const alvo = document.getElementById('recentes-container');
+                if (alvo) alvo.innerHTML = html;
+            } catch (e) {
+                console.warn('Erro ao carregar chamados recentes', e);
+            }
+        }
+        window.addEventListener('load', carregarRecentes);
+        setInterval(carregarRecentes, 20000); // atualiza a cada 20s
+    </script>
+
+    @RenderSection("Scripts", required: false)
+    @await Html.PartialAsync("_AvaliacaoModal", new SuporteTI.Web.DTOs.AvaliacaoCreateDto())
+
 </body>
 </html>

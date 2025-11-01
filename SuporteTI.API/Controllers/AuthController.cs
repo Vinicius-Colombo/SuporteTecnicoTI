@@ -107,14 +107,17 @@ namespace SuporteTI.API.Controllers
             if (usuario == null)
                 return Unauthorized("Usuário ou senha inválidos.");
 
+            // 🔹 Retorna também o campo CodigoValidado
             return Ok(new
             {
                 IdUsuario = usuario.IdUsuario,
                 Nome = usuario.Nome,
                 Email = usuario.Email,
-                Tipo = usuario.Tipo
+                Tipo = usuario.Tipo,
+                CodigoValidado = usuario.CodigoValidado  == true// 👈 ADICIONADO AQUI
             });
         }
+
 
 
 

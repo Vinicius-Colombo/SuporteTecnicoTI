@@ -1,0 +1,36 @@
+﻿@{
+    ViewData["Title"] = "Novo Chamado";
+    ViewBag.Nav = "Novo";
+}
+
+<h2>Novo Chamado</h2>
+
+@if (TempData["Mensagem"] != null)
+{
+    <div style="color:green; margin:10px 0">@TempData["Mensagem"]</div>
+}
+
+<form asp-action="AbrirChamado" asp-controller="Cliente" method="post" enctype="multipart/form-data">
+    <label for="titulo">Título</label>
+    <input type="text" id="titulo" name="titulo" placeholder="Insira o título do chamado" required style="width:100%;padding:8px;margin-bottom:10px" />
+
+    <label for="descricao">Descrição</label>
+    <textarea id="descricao" name="descricao" placeholder="Descreva o problema" required style="width:100%;height:150px;padding:8px;margin-bottom:10px"></textarea>
+
+    <div style="display:flex;align-items:center;gap:12px;margin:10px 0;">
+        <label class="btn-brand" for="anexo">📎 Anexo</label>
+        <input type="file" id="anexo" name="anexo" style="display:none" />
+        <span id="fileName">Nenhum arquivo selecionado</span>
+
+        <button type="submit" class="btn-brand" style="margin-left:auto;">Abrir Chamado</button>
+    </div>
+</form>
+
+@section Scripts {
+    <script>
+        document.getElementById('anexo').addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            document.getElementById('fileName').textContent = file ? file.name : 'Nenhum arquivo selecionado';
+        });
+    </script>
+}

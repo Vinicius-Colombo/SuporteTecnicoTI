@@ -1,0 +1,123 @@
+﻿@model SuporteTI.Web.DTOs.AvaliacaoCreateDto
+
+<div id="avaliacao-overlay" class="avaliacao-overlay" style="display:none;">
+    <div class="avaliacao-popup">
+        <h2>Como você avalia nosso atendimento?</h2>
+        <p>Escolha uma nota de 1 (péssimo) a 5 (excelente):</p>
+
+        <form id="avaliacao-form" method="post" asp-controller="Cliente" asp-action="EnviarAvaliacao">
+            <input type="hidden" name="IdChamado" value="@Model.IdChamado" />
+
+            <!-- ⭐ Estrelas -->
+            <div class="avaliacao-stars">
+                <input type="radio" id="star5" name="Nota" value="5"><label for="star5">&#9733;</label>
+                <input type="radio" id="star4" name="Nota" value="4"><label for="star4">&#9733;</label>
+                <input type="radio" id="star3" name="Nota" value="3"><label for="star3">&#9733;</label>
+                <input type="radio" id="star2" name="Nota" value="2"><label for="star2">&#9733;</label>
+                <input type="radio" id="star1" name="Nota" value="1"><label for="star1">&#9733;</label>
+            </div>
+
+            <!-- 💬 Comentário -->
+            <textarea name="Comentario" class="form-control" rows="3" placeholder="Deixe um comentário (opcional)..."
+                      style="resize:none;margin-top:10px;"></textarea>
+
+            <div style="margin-top:15px;">
+                <button type="submit" class="btn-brand">Enviar Avaliação</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<style>
+    /* Fundo escurecido */
+    .avaliacao-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.6);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 9999;
+    }
+
+    /* Janela */
+    .avaliacao-popup {
+        background: #fff;
+        border-radius: 12px;
+        padding: 25px 30px;
+        text-align: center;
+        width: 340px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+        animation: aparecer 0.3s ease;
+    }
+
+    @@keyframes aparecer {
+        from
+
+    {
+        transform: translateY(-15px);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+
+    }
+
+    .avaliacao-popup h2 {
+        color: var(--brand, Highlight);
+        margin-top: 0;
+        font-size: 1.2rem;
+    }
+
+    /* ⭐ Estrelas */
+    .avaliacao-stars {
+        display: flex;
+        flex-direction: row-reverse;
+        justify-content: center;
+        margin: 15px 0;
+    }
+
+        .avaliacao-stars input {
+            display: none;
+        }
+
+        .avaliacao-stars label {
+            font-size: 34px;
+            color: #ccc;
+            cursor: pointer;
+            transition: color 0.25s;
+        }
+
+            .avaliacao-stars input:checked ~ label,
+            .avaliacao-stars label:hover,
+            .avaliacao-stars label:hover ~ label {
+                color: #FFD700;
+            }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const overlay = document.getElementById('avaliacao-overlay');
+
+        // Fechar ao clicar fora da janela
+        overlay.addEventListener('click', e => {
+            if (e.target === overlay) overlay.style.display = 'none';
+        });
+
+        // Mostrar o pop-up programaticamente (chamado resolvido)
+        window.exibirAvaliacao = function() {
+            overlay.style.display = 'flex';
+        };
+
+        // Fechar automaticamente ao enviar
+        document.getElementById('avaliacao-form').addEventListener('submit', () => {
+            setTimeout(() => overlay.style.display = 'none', 500);
+        });
+    });
+</script>

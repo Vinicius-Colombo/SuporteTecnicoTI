@@ -1,0 +1,36 @@
+﻿@model List<SuporteTI.Web.DTOs.ChamadoReadDto>
+
+@{
+    string Cor(string? status)
+    {
+        switch ((status ?? "").ToLower())
+        {
+            case "resolvido": return "#28a745";
+            case "em andamento": return "#ff9800";
+            case "encerrado": return "#dc3545";
+            default: return "#0d6efd"; // aberto / outros
+        }
+    }
+}
+
+@if (Model == null || !Model.Any())
+{
+    <p style="color:gray;">Nenhum chamado recente.</p>
+}
+else
+{
+    foreach (var c in Model)
+    {
+        var cor = Cor(c.StatusChamado);
+        <div class="card-chamado"
+             onclick="location.href='/Cliente/Chat/@c.IdChamado'"
+             style="cursor:pointer; border-left:4px solid @cor; margin-bottom:10px; padding:10px; border-radius:8px; background:#fff; border:1px solid #e5e7eb;">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <strong>Chamado #@c.IdChamado</strong>
+                <span style="color:@cor; font-weight:600;">@c.StatusChamado</span>
+            </div>
+            <div style="margin-top:4px; color:#444;">@c.Titulo</div>
+            <small style="color:#6c757d;">Clique aqui para mais detalhes</small>
+        </div>
+    }
+}

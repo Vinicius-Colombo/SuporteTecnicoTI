@@ -1,0 +1,76 @@
+﻿@model SuporteTI.Web.Models.ChatViewModel
+
+@if (Model.Interacoes == null || !Model.Interacoes.Any())
+{
+    <p style="color:gray;text-align:center;margin-top:40px;">Nenhuma mensagem ainda neste chamado.</p>
+}
+else
+{
+    @foreach (var msg in Model.Interacoes.OrderBy(i => i.DataHora))
+    {
+        string alinhamento = "flex-start";
+        string corFundo = "#e9ecef";
+        string corTexto = "#000";
+        string pesoFonte = "normal";
+
+        switch (msg.Origem?.ToLower())
+        {
+            case "cliente":
+                alinhamento = "flex-end";
+                corFundo = "#eaf2ff";
+                corTexto = "#0046ad";
+                pesoFonte = "600";
+                break;
+
+            case "ia":
+                alinhamento = "flex-start";
+                corFundo = "#dff6e0";
+                corTexto = "#155724";
+                break;
+
+            case "sistema":
+                alinhamento = "center";
+                corFundo = "#e7f1ff";
+                corTexto = "#004085";
+                pesoFonte = "600";
+                break;
+        }
+
+        <div style="display:flex;justify-content:@alinhamento;margin-bottom:10px;">
+            <div style="background-color:@corFundo;color:@corTexto;padding:10px 14px;border-radius:12px;
+                                max-width:60%;box-shadow:0 1px 2px rgba(0,0,0,0.15);font-weight:@pesoFonte;
+                                text-align:@(alinhamento == "center" ? "center" : "left");">
+                @if (msg.Origem?.ToLower() != "sistema")
+                {
+                    <strong>@msg.NomeUsuario</strong>
+        
+                    <br />
+                }
+                <span>@msg.Mensagem</span><br />
+                <small style="font-size:11px;color:#6c757d;">@msg.DataHora.ToString("HH:mm")</small>
+            </div>
+        </div>
+
+        @if (msg.Origem?.ToLower() == "ia" && Model.Chamado.StatusChamado?.ToLower() == "aberto")
+        {
+            <div style="display:flex;justify-content:flex-start;margin-top:4px;margin-bottom:12px;">
+                <form asp-controller="Cliente" asp-action="ResponderIA" method="post" style="display:flex;align-items:center;gap:8px;">
+                    <input type="hidden" name="idChamado" value="@Model.Chamado.IdChamado" />
+                    <label style="font-weight:600;margin-right:4px;">Essa solução resolveu seu problema?</label>
+
+                    <button type="submit" name="resposta" value="sim"
+                            class="btn"
+                            style="background:#28a745;color:white;border:none;padding:6px 16px;border-radius:6px;">
+                        Sim
+                    </button>
+
+                    <button type="submit" name="resposta" value="nao"
+                            class="btn"
+                            style="background:#dc3545;color:white;border:none;padding:6px 16px;border-radius:6px;">
+                        Não
+                    </button>
+                </form>
+            </div>
+        }
+    }
+}

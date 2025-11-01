@@ -11,5 +11,6 @@
         public string? Endereco { get; set; }            
         public DateOnly? DataNascimento { get; set; }    
         public string? Token { get; set; }
+        public bool CodigoValidado { get; set; }
     }
 }

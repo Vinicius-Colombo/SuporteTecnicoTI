@@ -1,0 +1,211 @@
+﻿@* Views/Shared/_AvaliacaoModal.cshtml *@
+<style>
+    .av-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, .55);
+        display: none;
+        align-items: center;
+        justify-content: center;
+        z-index: 1000;
+    }
+
+    .av-card {
+        background: #fff;
+        border-radius: 12px;
+        box-shadow: 0 8px 30px rgba(0, 0, 0, .2);
+        width: 360px;
+        max-width: 92vw;
+        padding: 24px;
+        animation: av-pop .18s ease-out;
+        box-sizing: border-box;
+    }
+
+    .av-title {
+        margin: 0 0 8px;
+        font-size: 18px;
+        color: #0d6efd;
+        font-weight: 700;
+        text-align: center;
+    }
+
+    .av-sub {
+        margin: 0 0 14px;
+        color: #555;
+        font-size: 14px;
+        text-align: center;
+    }
+
+    .av-stars {
+        display: flex;
+        flex-direction: row-reverse;
+        justify-content: center;
+        gap: 6px;
+        margin: 10px 0 18px;
+    }
+
+        .av-stars input {
+            display: none;
+        }
+
+        .av-stars label {
+            font-size: 32px;
+            color: #cfcfcf;
+            cursor: pointer;
+            transition: transform .08s, color .2s;
+        }
+
+            .av-stars input:checked ~ label,
+            .av-stars label:hover,
+            .av-stars label:hover ~ label {
+                color: #FFD43B;
+            }
+
+            .av-stars label:active {
+                transform: scale(.95);
+            }
+
+    .av-text-group {
+        text-align: left;
+        margin-top: 10px;
+    }
+
+        .av-text-group label {
+            display: block;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 6px;
+            font-size: 14px;
+        }
+
+    .av-text {
+        width: 100%;
+        resize: none;
+        min-height: 80px;
+        border: 1px solid #ced4da;
+        border-radius: 8px;
+        padding: 10px 12px;
+        font-size: 14px;
+        font-family: inherit;
+        box-sizing: border-box;
+        transition: border-color 0.2s;
+    }
+
+        .av-text:focus {
+            border-color: #0d6efd;
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(13, 110, 253, 0.15);
+        }
+
+    .av-actions {
+        display: flex;
+        gap: 10px;
+        justify-content: flex-end;
+        margin-top: 16px;
+    }
+
+    .btn-brand {
+        background: Highlight;
+        color: #fff;
+        border: none;
+        border-radius: 8px;
+        padding: 8px 16px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: filter 0.2s;
+    }
+
+        .btn-brand:hover {
+            filter: brightness(0.92);
+        }
+
+    .btn-light {
+        background: #f1f3f5;
+        border: 1px solid #dee2e6;
+        color: #333;
+        border-radius: 8px;
+        padding: 8px 16px;
+        cursor: pointer;
+        transition: background 0.2s;
+    }
+
+        .btn-light:hover {
+            background: #e9ecef;
+        }
+
+    @@keyframes av-pop {
+        from
+
+    {
+        transform: translateY(-6px);
+        opacity: 0;
+    }
+
+    to {
+        transform: none;
+        opacity: 1;
+    }
+
+    }
+</style>
+
+<div id="avaliacao-overlay" class="av-overlay">
+    <div class="av-card">
+        <h3 class="av-title">Avalie o atendimento</h3>
+        <p class="av-sub">Como você avalia a solução deste chamado?</p>
+
+        <form method="post" asp-controller="Cliente" asp-action="EnviarAvaliacao">
+            <input type="hidden" name="idChamado" id="av-idChamado" value="" />
+
+            <div class="av-stars">
+                <input type="radio" id="av-star5" name="nota" value="5"><label for="av-star5">&#9733;</label>
+                <input type="radio" id="av-star4" name="nota" value="4"><label for="av-star4">&#9733;</label>
+                <input type="radio" id="av-star3" name="nota" value="3"><label for="av-star3">&#9733;</label>
+                <input type="radio" id="av-star2" name="nota" value="2"><label for="av-star2">&#9733;</label>
+                <input type="radio" id="av-star1" name="nota" value="1" checked><label for="av-star1">&#9733;</label>
+            </div>
+
+            <div class="av-text-group">
+                <label for="av-comentario">Comentário (opcional)</label>
+                <textarea class="av-text" id="av-comentario" name="comentario"
+                          placeholder="Conte rapidamente como foi sua experiência..."></textarea>
+            </div>
+
+            <div class="av-actions">
+                <button type="button" class="btn-light" onclick="AvaliacaoModal.fechar()">Depois</button>
+                <button type="submit" class="btn-brand">Enviar</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    window.AvaliacaoModal = {
+        abrir: function (idChamado) {
+            const overlay = document.getElementById('avaliacao-overlay');
+            document.getElementById('av-idChamado').value = idChamado;
+            overlay.style.display = 'flex';
+            setTimeout(() => overlay.style.opacity = '1', 50);
+        },
+        fechar: function () {
+            const overlay = document.getElementById('avaliacao-overlay');
+            overlay.style.opacity = '0';
+            setTimeout(() => overlay.style.display = 'none', 200);
+        }
+    };
+
+    // 🎯 Auto-gatilho do modal (sem depender do script do Chat)
+    document.addEventListener("DOMContentLoaded", () => {
+        const gatilho = document.getElementById("trigger-avaliacao");
+        if (gatilho) {
+            const idChamado = gatilho.dataset.id;
+            setTimeout(() => {
+                window.AvaliacaoModal.abrir(idChamado);
+                const novaUrl = window.location.pathname;
+                window.history.replaceState({}, document.title, novaUrl);
+            }, 300);
+        }
+    });
+</script>
+
+

@@ -67,15 +67,13 @@ namespace SuporteTI.API.Controllers
 
             // 2️⃣ IA analisa o texto do chamado
             var (categoria, solucao, prioridade) = await _iaService.AnalisarChamadoAsync(dto.Descricao);
-
             chamado.Prioridade = prioridade;
 
             // 3️⃣ Associa categoria sugerida
             var categoriaExistente = await _context.Categoria
                 .FirstOrDefaultAsync(c => c.Nome.ToLower() == categoria.ToLower());
-
             if (categoriaExistente != null)
-                chamado.IdCategoria = categoriaExistente.IdCategoria; // ✅ agora 1:N
+                chamado.IdCategoria = categoriaExistente.IdCategoria;
 
             await _context.SaveChangesAsync();
 
@@ -129,60 +127,74 @@ namespace SuporteTI.API.Controllers
                         Nome = chamado.IdCategoriaNavigation.Nome
                     }
                     : null
-
             };
 
             return CreatedAtAction(nameof(Listar), new { chamadoId = chamado.IdChamado }, readDto);
         }
 
-        // 🔹 PUT: api/SolucaoSugerida/aceitar/{id}
-        [HttpPut("aceitar/{id}")]
-        public async Task<ActionResult> Aceitar(int id)
+        // 🔹 PUT: api/SolucaoSugerida/aceitar/{idChamado}
+        // 🔹 PUT: api/SolucaoSugerida/aceitar/{idChamado}
+        [HttpPut("aceitar/{idChamado}")]
+        public async Task<ActionResult> Aceitar(int idChamado)
         {
-            var solucao = await _context.SolucaoSugerida.FindAsync(id);
+            var solucao = await _context.SolucaoSugerida
+                .FirstOrDefaultAsync(s => s.IdChamado == idChamado);
+
             if (solucao == null)
-                return NotFound("Solução não encontrada.");
+                return NotFound("Nenhuma solução encontrada para este chamado.");
+
+            var chamado = await _context.Chamados.FindAsync(idChamado);
+            if (chamado == null)
+                return NotFound("Chamado não encontrado.");
 
             solucao.Aceita = true;
+            chamado.StatusChamado = "Resolvido";
+
+            // ✅ Garante que a data de fechamento seja registrada
+            chamado.DataFechamento = DateTime.Now;
+
             await _context.SaveChangesAsync();
 
-            return Ok(new { mensagem = "Solução aceita com sucesso.", idChamado = solucao.IdChamado });
+            return Ok(new
+            {
+                mensagem = "✅ Solução aceita. Chamado marcado como resolvido.",
+                idChamado = idChamado,
+                dataFechamento = chamado.DataFechamento
+            });
         }
 
-        // 🔹 PUT: api/SolucaoSugerida/rejeitar/{id}
-        [HttpPut("rejeitar/{id}")]
-        public async Task<ActionResult<SolucaoSugeridaReadDto>> Rejeitar(int id)
+
+        // 🔹 PUT: api/SolucaoSugerida/rejeitar/{idChamado}
+        [HttpPut("rejeitar/{idChamado}")]
+        public async Task<ActionResult> Rejeitar(int idChamado)
         {
             var solucao = await _context.SolucaoSugerida
                 .Include(s => s.IdChamadoNavigation)
                 .ThenInclude(c => c.IdCategoriaNavigation)
-                .FirstOrDefaultAsync(s => s.IdSolucao == id);
+                .FirstOrDefaultAsync(s => s.IdChamado == idChamado);
 
             if (solucao == null)
-                return NotFound("Solução não encontrada.");
+                return NotFound("Solução não encontrada para este chamado.");
 
             var chamado = solucao.IdChamadoNavigation;
             if (chamado == null)
                 return NotFound("Chamado não encontrado.");
 
-            // 🔹 Marca como rejeitada
             solucao.Aceita = false;
 
-            // 🔹 Busca categoria do chamado
+            // 🔹 Busca técnicos da categoria
             var categoria = chamado.IdCategoriaNavigation;
             if (categoria == null)
-                return BadRequest("Não foi possível identificar a categoria do chamado.");
+                return BadRequest("Categoria não identificada.");
 
-            // 🔹 Busca técnicos vinculados à categoria
             var tecnicos = await _context.TecnicoCategorias
                 .Where(tc => tc.IdCategoria == categoria.IdCategoria)
                 .Select(tc => tc.IdTecnico)
                 .ToListAsync();
 
             if (!tecnicos.Any())
-                return BadRequest("Nenhum técnico vinculado a essa categoria foi encontrado.");
+                return BadRequest("Nenhum técnico vinculado à categoria.");
 
-            // 🔹 Conta quantos chamados abertos cada técnico tem
             var tecnicoMenosOcupado = await _context.Usuarios
                 .Where(u => tecnicos.Contains(u.IdUsuario))
                 .Select(u => new
@@ -190,7 +202,7 @@ namespace SuporteTI.API.Controllers
                     Tecnico = u,
                     ChamadosAbertos = _context.Chamados.Count(c =>
                         c.IdTecnico == u.IdUsuario &&
-                        c.StatusChamado == "Aberto")
+                        (c.StatusChamado == "Aberto" || c.StatusChamado == "Em andamento"))
                 })
                 .OrderBy(t => t.ChamadosAbertos)
                 .Select(t => t.Tecnico)
@@ -199,25 +211,17 @@ namespace SuporteTI.API.Controllers
             if (tecnicoMenosOcupado == null)
                 return BadRequest("Não foi possível determinar um técnico disponível.");
 
-            // 🔹 Atribui o chamado ao técnico menos ocupado
             chamado.IdTecnico = tecnicoMenosOcupado.IdUsuario;
+            chamado.StatusChamado = "Aberto"; // 👈 mantém aberto até o técnico responder
 
             await _context.SaveChangesAsync();
 
-            var dto = new SolucaoSugeridaReadDto
-            {
-                IdSolucao = solucao.IdSolucao,
-                IdChamado = solucao.IdChamado,
-                Titulo = solucao.Titulo,
-                Conteudo = solucao.Conteudo,
-                Aceita = solucao.Aceita ?? false
-            };
-
             return Ok(new
             {
-                mensagem = $"Solução rejeitada. Chamado atribuído ao técnico {tecnicoMenosOcupado.Nome}.",
-                solucao = dto
+                mensagem = $"🔄 Solução rejeitada. Chamado atribuído ao técnico {tecnicoMenosOcupado.Nome}.",
+                idChamado = idChamado
             });
         }
+
     }
 }

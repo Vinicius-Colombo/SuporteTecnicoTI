@@ -1,0 +1,96 @@
+﻿@model SuporteTI.Web.DTOs.LoginResponseDto
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewData["Title"] = "Perfil do Cliente";
+}
+
+<h2>Meu Perfil</h2>
+<p style="color: #666; margin-bottom: 25px;">Essas são suas informações cadastradas. Caso encontre algum erro, abra um chamado informando a correção desejada.</p>
+
+<div class="perfil-card">
+    <div class="perfil-item">
+        <strong>Nome:</strong>
+        <span>@Model.Nome</span>
+    </div>
+    <div class="perfil-item">
+        <strong>Email:</strong>
+        <span>@Model.Email</span>
+    </div>
+    <div class="perfil-item">
+        <strong>CPF:</strong>
+        <span>@(string.IsNullOrWhiteSpace(Model.Cpf) ? "Não informado" : Model.Cpf)</span>
+    </div>
+    <div class="perfil-item">
+        <strong>Telefone:</strong>
+        <span>@(string.IsNullOrWhiteSpace(Model.Telefone) ? "Não informado" : Model.Telefone)</span>
+    </div>
+    <div class="perfil-item">
+        <strong>Endereço:</strong>
+        <span>@(string.IsNullOrWhiteSpace(Model.Endereco) ? "Não informado" : Model.Endereco)</span>
+    </div>
+    <div class="perfil-item">
+        <strong>Data de Nascimento:</strong>
+        <span>
+            @(Model.DataNascimento.HasValue
+                        ? Model.DataNascimento.Value.ToString("dd/MM/yyyy")
+                        : "Não informado")
+        </span>
+
+    </div>
+</div>
+
+@section Styles {
+    <style>
+        h2 {
+            color: #222;
+            margin-bottom: 10px;
+        }
+
+        .perfil-card {
+            background: #fff;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            padding: 25px;
+            width: 100%;
+            max-width: 600px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.05);
+        }
+
+        .perfil-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid #eee;
+        }
+
+        .perfil-item strong {
+            color: #333;
+            width: 160px;
+            text-align: right;
+            margin-right: 20px;
+        }
+
+        .perfil-item span {
+            color: #444;
+            flex: 1;
+            text-align: left;
+        }
+
+        .perfil-item:last-child {
+            border-bottom: none;
+        }
+
+        @@media (max-width: 600px) {
+            .perfil-item {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .perfil-item strong {
+                text-align: left;
+                margin-bottom: 4px;
+            }
+        }
+    </style>
+}

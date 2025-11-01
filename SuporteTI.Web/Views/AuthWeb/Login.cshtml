@@ -1,0 +1,29 @@
+﻿@model SuporteTI.Web.Models.LoginModel
+@{
+    Layout = "~/Views/Shared/_LayoutLogin.cshtml";
+    ViewData["Title"] = "Login - Suporte Técnico";
+}
+
+<div class="card-login">
+    <h2>Login - Suporte Técnico</h2>
+
+    <form asp-action="Login" method="post">
+        <label for="email">Email</label>
+        <input asp-for="Email" type="text" placeholder="Digite seu e-mail" />
+        <span asp-validation-for="Email" class="text-danger"></span>
+
+        <label for="senha">Senha</label>
+        <input asp-for="Senha" type="password" placeholder="Digite sua senha" />
+        <span asp-validation-for="Senha" class="text-danger"></span>
+
+        <button type="submit">Entrar</button>
+
+        <p class="description">
+            Digite seu e-mail e senha para acessar o suporte técnico.
+        </p>
+    </form>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

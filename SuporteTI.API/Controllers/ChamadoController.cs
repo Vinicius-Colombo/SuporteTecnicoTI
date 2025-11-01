@@ -262,5 +262,47 @@ namespace SuporteTI.API.Controllers
 
             return NoContent();
         }
+
+        [HttpGet("notificacoes/mensagens/{idCliente}")]
+        public async Task<IActionResult> ObterNotificacoesMensagens(int idCliente)
+        {
+            // 🔹 Busca todos os chamados do cliente
+            var chamados = await _context.Chamados
+                .Where(c => c.IdUsuario == idCliente)
+                .ToListAsync();
+
+            var notificacoes = new List<object>();
+
+            foreach (var chamado in chamados)
+            {
+                // 🔹 Busca a última interação
+                var ultima = await _context.Interacoes
+                    .Where(i => i.IdChamado == chamado.IdChamado)
+                    .OrderByDescending(i => i.DataHora)
+                    .FirstOrDefaultAsync();
+
+                if (ultima == null)
+                    continue;
+
+                // ⚙️ Se a última interação NÃO for do cliente → nova resposta
+                if (ultima.IdUsuario != idCliente)
+                {
+                    notificacoes.Add(new
+                    {
+                        idChamado = chamado.IdChamado,
+                        idInteracao = ultima.IdInteracao,
+                        titulo = $"Chamado #{chamado.IdChamado} - Nova resposta do suporte",
+                        mensagem = ultima.Mensagem.Length > 80
+                            ? ultima.Mensagem.Substring(0, 80) + "..."
+                            : ultima.Mensagem,
+                        data = ultima.DataHora
+                    });
+                }
+            }
+
+            return Ok(notificacoes.OrderByDescending(n =>
+                n.GetType().GetProperty("data")!.GetValue(n)));
+        }
+
     }
 }

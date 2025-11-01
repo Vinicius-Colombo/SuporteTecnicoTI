@@ -1,0 +1,18 @@
+﻿@{
+    Layout = "~/Views/Shared/_LayoutLogin.cshtml";
+    ViewData["Title"] = "Código de Verificação";
+}
+
+<div class="card-login">
+    <h2>Código de Verificação</h2>
+    <p class="description">
+        Enviamos um código de segurança para o seu e-mail.<br />
+        Digite o código no campo abaixo para continuar.
+    </p>
+
+    <form asp-action="ValidarCodigo" method="post">
+        <label for="codigo">Código de Verificação</label>
+        <input type="text" name="codigo" placeholder="Digite o código recebido" required />
+        <button type="submit">Confirmar Código</button>
+    </form>
+</div>
