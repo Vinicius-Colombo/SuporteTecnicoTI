@@ -5,6 +5,9 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <UserSecretsId>6cf9f3ac-079d-40a7-a335-3f29e338693c</UserSecretsId>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <UserSecretsId>SuporteTI.API-IAKey</UserSecretsId>
   </PropertyGroup>
 
   <ItemGroup>

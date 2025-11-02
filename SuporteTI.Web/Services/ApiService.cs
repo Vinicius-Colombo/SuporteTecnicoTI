@@ -38,14 +38,26 @@ namespace SuporteTI.Web.Services
         // 🔹 Abrir Chamado (com ou sem anexo)
         public async Task<int?> AbrirChamadoAsync(int idUsuario, string titulo, string descricao, IFormFile? anexo)
         {
+            // 🔹 Sanitiza a descrição (remove caracteres quebrados e espaços invisíveis)
+            descricao = descricao?.Normalize().Trim() ?? "";
+            descricao = descricao.Replace("\r", " ").Replace("\n", " ");
+
+            // 🔹 Monta o objeto compatível com ChamadoCreateDto
             var dto = new
             {
                 Titulo = titulo,
                 Descricao = descricao,
-                IdUsuario = idUsuario
+                IdUsuario = idUsuario,
+                Prioridade = "Media",
+                Categoria = ""
             };
 
-            var json = JsonSerializer.Serialize(dto);
+            // 🔹 Serializa e envia
+            var json = JsonSerializer.Serialize(dto, new JsonSerializerOptions
+            {
+                PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+            });
+
             var content = new StringContent(json, Encoding.UTF8, "application/json");
             var response = await _http.PostAsync($"{_baseUrl}/Chamado", content);
 
@@ -56,6 +68,7 @@ namespace SuporteTI.Web.Services
             using var doc = JsonDocument.Parse(jsonResult);
             var idChamado = doc.RootElement.GetProperty("idChamado").GetInt32();
 
+            // 🔹 Anexo opcional
             if (anexo != null)
             {
                 using var form = new MultipartFormDataContent();
@@ -71,6 +84,7 @@ namespace SuporteTI.Web.Services
 
             return idChamado;
         }
+
 
         // 🔹 Histórico de Chamados
         public async Task<List<ChamadoReadDto>> ObterChamadosAsync(int idUsuario)
