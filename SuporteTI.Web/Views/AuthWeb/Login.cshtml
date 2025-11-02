@@ -8,6 +8,8 @@
     <h2>Login - Suporte Técnico</h2>
 
     <form asp-action="Login" method="post">
+        @Html.ValidationSummary(false, "", new { @class = "text-danger", style = "margin-bottom:10px;" })
+
         <label for="email">Email</label>
         <input asp-for="Email" type="text" placeholder="Digite seu e-mail" />
         <span asp-validation-for="Email" class="text-danger"></span>

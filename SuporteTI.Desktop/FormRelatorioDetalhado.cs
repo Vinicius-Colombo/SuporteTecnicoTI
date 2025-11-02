@@ -112,8 +112,31 @@ namespace SuporteTI.Desktop
                 response.EnsureSuccessStatusCode();
 
                 var json = await response.Content.ReadAsStringAsync();
-                var avaliacoes = JsonSerializer.Deserialize<List<AvaliacaoDto>>(json,
-                    new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+                using var doc = JsonDocument.Parse(json);
+
+                var avaliacoes = new List<AvaliacaoDto>();
+
+                foreach (var item in doc.RootElement.EnumerateArray())
+                {
+                    int idChamado = 0;
+
+                    if (item.TryGetProperty("chamadoId", out var id))
+                        idChamado = id.GetInt32();
+                    else if (item.TryGetProperty("idChamado", out var id2))
+                        idChamado = id2.GetInt32();
+                    else if (item.TryGetProperty("chamado", out var ch) && ch.TryGetProperty("idChamado", out var id3))
+                        idChamado = id3.GetInt32();
+
+                    avaliacoes.Add(new AvaliacaoDto
+                    {
+                        ChamadoId = idChamado,
+                        TituloChamado = item.GetProperty("tituloChamado").GetString() ?? "",
+                        Tecnico = item.GetProperty("tecnico").GetString() ?? "",
+                        Nota = item.GetProperty("nota").GetInt32(),
+                        Comentario = item.GetProperty("comentario").GetString() ?? ""
+                    });
+                }
+
 
                 if (avaliacoes == null) return;
 

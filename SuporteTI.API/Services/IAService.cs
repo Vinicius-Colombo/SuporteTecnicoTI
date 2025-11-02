@@ -27,16 +27,16 @@ namespace SuporteTI.API.Services
 
             // Prompt estruturado (em português)
             var prompt = $@"
-Você é um assistente técnico especializado em suporte de TI.
-Analise a descrição do chamado abaixo e gere uma resposta estruturada.
-Responda **apenas** no formato:
+                        Você é um assistente técnico especializado em suporte de TI.
+                        Analise a descrição do chamado abaixo e gere uma resposta estruturada.
+                        Responda **apenas** no formato:
 
-Categoria: [Hardware | Software | Rede | Acesso | Outros]
-Prioridade: [Alta | Média | Baixa]
-Solução: [descrição curta da solução]
+                        Categoria: [Hardware | Software | Rede | Acesso | Outros]
+                        Prioridade: [Alta | Média | Baixa]
+                        Solução: [descrição curta da solução]
 
-Descrição do chamado: {descricao}
-";
+                        Descrição do chamado: {descricao}
+                        ";
 
             var requestBody = new
             {
@@ -55,8 +55,7 @@ Descrição do chamado: {descricao}
             var response = await _httpClient.PostAsync("https://api.openai.com/v1/chat/completions", content);
             var json = await response.Content.ReadAsStringAsync();
 
-            Console.WriteLine($"[OpenAI] status={response.StatusCode}");
-            Console.WriteLine(json);
+            
 
             if (!response.IsSuccessStatusCode)
                 return (categoria, $"Erro ao consultar OpenAI: {response.ReasonPhrase}", prioridade);

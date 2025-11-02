@@ -11,6 +11,8 @@
         public string? Endereco { get; set; }            
         public DateTime? DataNascimento { get; set; }    
         public string? Token { get; set; }
-        public bool CodigoValidado { get; set; } 
+        public bool CodigoValidado { get; set; }
+        public DateTime? ExpiracaoCodigo { get; set; }
+
     }
 }

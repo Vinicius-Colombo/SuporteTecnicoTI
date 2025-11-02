@@ -70,13 +70,14 @@ namespace SuporteTI.Web.Controllers
                 return View(model);
             }
 
-            // 2️⃣ Verifica se já foi validado anteriormente
+            // 2️⃣ Se o código já foi validado, entra direto (igual ao desktop)
             if (usuario.CodigoValidado)
             {
                 CriarSessao(usuario);
                 HttpContext.Session.SetString("UltimaValidacao", DateTime.Now.ToString());
                 return RedirectToAction("Novo", "Cliente");
             }
+
 
             // 3️⃣ Solicita envio do código se ainda não foi validado
             var responseCodigo = await _httpClient.PostAsJsonAsync("Auth/solicitar-codigo", new
