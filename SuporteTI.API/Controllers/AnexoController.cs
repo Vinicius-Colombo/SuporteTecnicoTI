@@ -10,12 +10,10 @@ namespace SuporteTI.API.Controllers
     public class AnexoController : ControllerBase
     {
         private readonly SuporteTiDbContext _context;
-        private readonly IWebHostEnvironment _env;
 
-        public AnexoController(SuporteTiDbContext context, IWebHostEnvironment env)
+        public AnexoController(SuporteTiDbContext context)
         {
             _context = context;
-            _env = env;
         }
 
         // 🔹 POST: api/Anexo/{chamadoId}
@@ -40,7 +38,7 @@ namespace SuporteTI.API.Controllers
             {
                 IdChamado = chamadoId,
                 NomeArquivo = arquivo.FileName,
-                CaminhoArquivo = Path.GetExtension(arquivo.FileName),
+                CaminhoArquivo = Path.GetExtension(arquivo.FileName), // apenas extensão
                 Conteudo = conteudo,
                 DataEnvio = DateTime.Now
             };
@@ -52,11 +50,10 @@ namespace SuporteTI.API.Controllers
             {
                 IdAnexo = anexo.IdAnexo,
                 NomeArquivo = anexo.NomeArquivo,
-                Extensao = anexo.CaminhoArquivo,
+                Extensao = Path.GetExtension(arquivo.FileName),
                 DataEnvio = (DateTime)anexo.DataEnvio
             });
         }
-
 
         // 🔹 GET: api/Anexo/{chamadoId}
         [HttpGet("{chamadoId}")]
@@ -72,13 +69,12 @@ namespace SuporteTI.API.Controllers
                     Extensao = Path.GetExtension(a.NomeArquivo),
                     DataEnvio = (DateTime)a.DataEnvio,
                     TituloChamado = a.IdChamadoNavigation.Titulo,
-                    Conteudo = a.Conteudo // 🔹 <-- importante!
+                    Conteudo = a.Conteudo
                 })
                 .ToListAsync();
 
             return Ok(anexos);
         }
-
 
         // 🔹 GET: api/Anexo/download/{id}
         [HttpGet("download/{id}")]
@@ -88,11 +84,8 @@ namespace SuporteTI.API.Controllers
             if (anexo == null || anexo.Conteudo == null)
                 return NotFound("Anexo não encontrado.");
 
-            var contentType = "application/octet-stream";
-            return File(anexo.Conteudo, contentType, anexo.NomeArquivo);
+            return File(anexo.Conteudo, "application/octet-stream", anexo.NomeArquivo);
         }
-
-
 
         // 🔹 DELETE: api/Anexo/{id}
         [HttpDelete("{id}")]
@@ -102,12 +95,6 @@ namespace SuporteTI.API.Controllers
             if (anexo == null)
                 return NotFound("Anexo não encontrado.");
 
-            // 🔸 Deleta o arquivo físico se existir
-            var caminhoCompleto = Path.Combine(_env.WebRootPath, anexo.CaminhoArquivo.TrimStart('/'));
-            if (System.IO.File.Exists(caminhoCompleto))
-                System.IO.File.Delete(caminhoCompleto);
-
-            // 🔸 Remove do banco
             _context.Anexos.Remove(anexo);
             await _context.SaveChangesAsync();
 

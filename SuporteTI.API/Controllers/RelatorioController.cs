@@ -57,13 +57,15 @@ namespace SuporteTI.API.Controllers
 
             var total = chamadosDto.Count;
             var abertos = chamadosDto.Count(c => (c.StatusChamado ?? "").ToLower() == "aberto");
-            var fechados = chamadosDto.Count(c => (c.StatusChamado ?? "").ToLower() == "fechado");
+            var encerrados = chamadosDto.Count(c =>
+                (c.StatusChamado ?? "").ToLower() == "encerrado" ||
+                (c.StatusChamado ?? "").ToLower() == "resolvido");
 
             return Ok(new
             {
                 TotalChamados = total,
                 ChamadosAbertos = abertos,
-                ChamadosFechados = fechados,
+                ChamadosEncerrados = encerrados,
                 Chamados = chamadosDto
             });
         }
@@ -104,12 +106,13 @@ namespace SuporteTI.API.Controllers
                         Nome = c.IdCategoriaNavigation.Nome
                     }
                     : null
-
             }).ToList();
 
             var total = chamadosDto.Count;
             var alta = chamadosDto.Count(c => (c.Prioridade ?? "").ToLower() == "alta");
-            var media = chamadosDto.Count(c => (c.Prioridade ?? "").ToLower() == "média" || (c.Prioridade ?? "").ToLower() == "media");
+            var media = chamadosDto.Count(c =>
+                (c.Prioridade ?? "").ToLower() == "média" ||
+                (c.Prioridade ?? "").ToLower() == "media");
             var baixa = chamadosDto.Count(c => (c.Prioridade ?? "").ToLower() == "baixa");
 
             return Ok(new
@@ -121,7 +124,6 @@ namespace SuporteTI.API.Controllers
                 Chamados = chamadosDto
             });
         }
-
         // 🔹 GET: api/Relatorio/avaliacoes?idTecnico=5
         [HttpGet("avaliacoes")]
         public async Task<IActionResult> Avaliacoes([FromQuery] int? idTecnico = null)
@@ -165,12 +167,14 @@ namespace SuporteTI.API.Controllers
                 })
                 .ToListAsync();
 
-            var todosStatus = new[] { "Aberto", "Em Atendimento", "Resolvido", "Encerrado" };
+            // 🚨 Corrigido: "Em Atendimento" → "Em Andamento"
+            var todosStatus = new[] { "Aberto", "Em Andamento", "Resolvido", "Encerrado" };
 
             var resultado = todosStatus.Select(s => new ChamadoStatusResumoDto
             {
                 Status = s,
-                Quantidade = chamados.FirstOrDefault(c => (c.Status ?? "").ToLower() == s.ToLower())?.Quantidade ?? 0
+                Quantidade = chamados.FirstOrDefault(c =>
+                    (c.Status ?? "").ToLower() == s.ToLower())?.Quantidade ?? 0
             });
 
             return Ok(resultado);
@@ -190,8 +194,14 @@ namespace SuporteTI.API.Controllers
                             c.DataAbertura.Value.Year == anoAtual);
 
             var total = await chamadosDoMes.CountAsync();
-            var abertos = await chamadosDoMes.CountAsync(c => (c.StatusChamado ?? "").ToLower() == "aberto");
-            var fechados = await chamadosDoMes.CountAsync(c => (c.StatusChamado ?? "").ToLower() == "fechado");
+            var abertos = await chamadosDoMes
+                .CountAsync(c => (c.StatusChamado ?? "").ToLower() == "aberto");
+
+            // 🚨 Corrigido: "fechado" → "encerrado" ou "resolvido"
+            var encerrados = await chamadosDoMes
+                .CountAsync(c =>
+                    (c.StatusChamado ?? "").ToLower() == "encerrado" ||
+                    (c.StatusChamado ?? "").ToLower() == "resolvido");
 
             var mesNome = agora.ToString("MMMM", new CultureInfo("pt-BR"));
             mesNome = char.ToUpper(mesNome[0]) + mesNome.Substring(1);
@@ -201,12 +211,11 @@ namespace SuporteTI.API.Controllers
                 Mes = mesNome,
                 TotalChamados = total,
                 ChamadosAbertos = abertos,
-                ChamadosFechados = fechados
+                ChamadosEncerrados = encerrados
             };
 
             return Ok(resultado);
         }
-
         // 🔹 POST: api/Relatorio/filtrado
         [HttpPost("filtrado")]
         public async Task<IActionResult> Filtrado([FromBody] RelatorioRequestDto filtros)
@@ -227,7 +236,8 @@ namespace SuporteTI.API.Controllers
             // 📆 Filtro de Período
             // ===============================
             DateTime hoje = DateTime.Today;
-            DateTime inicio = hoje, fim = DateTime.Now;
+            DateTime inicio = hoje;
+            DateTime fim = DateTime.Now;
 
             switch ((filtros.Tipo ?? "").ToLower())
             {
@@ -236,15 +246,19 @@ namespace SuporteTI.API.Controllers
                     inicio = hoje;
                     fim = hoje.AddDays(1);
                     break;
+
                 case "semanal":
                     inicio = hoje.AddDays(-7);
                     break;
+
                 case "mensal":
                     inicio = new DateTime(hoje.Year, hoje.Month, 1);
                     break;
+
                 case "anual":
                     inicio = new DateTime(hoje.Year, 1, 1);
                     break;
+
                 default:
                     inicio = DateTime.MinValue;
                     fim = DateTime.MaxValue;
@@ -290,11 +304,16 @@ namespace SuporteTI.API.Controllers
             // 📋 Montagem dos dados do relatório
             // ===============================
             var totalChamados = chamados.Count;
-            var resolvidosPrazo = chamados.Count(c => c.StatusChamado == "Encerrado");
+
+            // 🚨 Corrigido: seu sistema usa "Encerrado" ou "Resolvido"
+            var resolvidosPrazo = chamados.Count(c =>
+                (c.StatusChamado ?? "").ToLower() == "encerrado" ||
+                (c.StatusChamado ?? "").ToLower() == "resolvido");
 
             var tempoMedio = chamados
                 .Where(c => c.DataFechamento != null)
-                .Select(c => (c.DataFechamento!.Value - (c.DataAbertura ?? c.DataFechamento!.Value)).TotalHours)
+                .Select(c =>
+                    (c.DataFechamento!.Value - (c.DataAbertura ?? c.DataFechamento!.Value)).TotalHours)
                 .DefaultIfEmpty(0)
                 .Average();
 
@@ -305,6 +324,9 @@ namespace SuporteTI.API.Controllers
                 .Select(g => g.Key)
                 .FirstOrDefault() ?? "Nenhuma";
 
+            // ===============================
+            // 📄 Dados detalhados
+            // ===============================
             var chamadosDetalhados = chamados.Select(c => new ChamadoDetalhadoDto
             {
                 IdChamado = c.IdChamado,
@@ -313,9 +335,16 @@ namespace SuporteTI.API.Controllers
                 Cliente = c.IdUsuarioNavigation?.Nome ?? "N/A",
                 Categoria = c.IdCategoriaNavigation?.Nome ?? "Sem categoria",
                 Prioridade = c.Prioridade ?? "-",
-                TempoAtendimento = c.DataFechamento != null
-                    ? $"{(c.DataFechamento!.Value - (c.DataAbertura ?? c.DataFechamento!.Value)).TotalHours:F1}h"
-                    : (c.StatusChamado == "Encerrado" ? "0h" : "Em andamento")
+
+                // 🔹 Tempo de atendimento
+                TempoAtendimento =
+                    c.DataFechamento != null
+                        ? $"{(c.DataFechamento!.Value - (c.DataAbertura ?? c.DataFechamento!.Value)).TotalHours:F1}h"
+                        : ((c.StatusChamado ?? "").ToLower() == "encerrado" ||
+                           (c.StatusChamado ?? "").ToLower() == "resolvido")
+                            ? "0h"
+                            : "Em Andamento"
+
             }).ToList();
 
             // ===============================
@@ -330,7 +359,6 @@ namespace SuporteTI.API.Controllers
                     .Take(10)
                     .ToList(),
 
-
                 prioridades = chamados
                     .GroupBy(c => string.IsNullOrEmpty(c.Prioridade) ? "Sem prioridade" : c.Prioridade)
                     .Select(g => new { Nome = g.Key, Quantidade = g.Count() })
@@ -344,7 +372,6 @@ namespace SuporteTI.API.Controllers
                     .OrderBy(g => g.Data)
                     .ToList()
             };
-
 
             // ===============================
             // 🏅 RANKINGS
@@ -369,7 +396,7 @@ namespace SuporteTI.API.Controllers
             };
 
             // ===============================
-            // ✅ Retorno final no formato padronizado
+            // ✅ Retorno Final
             // ===============================
             var retorno = new
             {
@@ -388,9 +415,5 @@ namespace SuporteTI.API.Controllers
 
             return Ok(retorno);
         }
-
-
-
-
     }
 }

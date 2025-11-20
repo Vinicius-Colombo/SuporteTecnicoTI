@@ -17,8 +17,25 @@ namespace SuporteTI.Web.Services
         public ApiService(HttpClient http, IConfiguration config)
         {
             _http = http;
-            _baseUrl = config["Api:BaseUrl"] ?? "https://localhost:7177/api";
+            _baseUrl = config["Api:BaseUrl"]
+                ?? throw new Exception("BaseUrl da API não configurada!");
         }
+
+        public async Task<T?> PostAsync<T>(string endpoint, object data)
+        {
+            var json = JsonSerializer.Serialize(data);
+            var content = new StringContent(json, Encoding.UTF8, "application/json");
+
+            var response = await _http.PostAsync($"{_baseUrl}/{endpoint}", content);
+
+            if (!response.IsSuccessStatusCode)
+                return default;
+
+            var result = await response.Content.ReadAsStringAsync();
+            return JsonSerializer.Deserialize<T>(result,
+                new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+        }
+
 
 
         public async Task<LoginResponseDto?> ObterUsuarioPorIdAsync(int idUsuario)
@@ -225,10 +242,19 @@ namespace SuporteTI.Web.Services
                 ?? new List<SolucaoSugeridaReadDto>();
         }
 
-        public async Task<HttpResponseMessage> GetAsync(string endpoint)
+        public async Task<T?> GetAsync<T>(string endpoint)
         {
-            return await _http.GetAsync($"{_baseUrl}/{endpoint}");
+            var response = await _http.GetAsync($"{_baseUrl}/{endpoint}");
+
+            if (!response.IsSuccessStatusCode)
+                return default;
+
+            var json = await response.Content.ReadAsStringAsync();
+
+            return JsonSerializer.Deserialize<T>(json,
+                new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
         }
+
 
     }
 }

@@ -1,11 +1,5 @@
 ﻿using SuporteTI.Desktop.DTOs;
 using SuporteTI.Desktop.Services;
-using System;
-using System.Collections.Generic;
-using System.Drawing;
-using System.Linq;
-using System.Threading.Tasks;
-using System.Windows.Forms;
 
 namespace SuporteTI.Desktop
 {
@@ -120,7 +114,7 @@ namespace SuporteTI.Desktop
 
                     if (chamado.StatusChamado.Equals("Aberto", StringComparison.OrdinalIgnoreCase))
                         item.BackColor = Color.FromArgb(220, 245, 255);
-                    else if (chamado.StatusChamado.Equals("Em andamento", StringComparison.OrdinalIgnoreCase))
+                    else if (chamado.StatusChamado.Equals("Em Andamento", StringComparison.OrdinalIgnoreCase))
                         item.BackColor = Color.FromArgb(255, 250, 220);
 
                     lvChamados.Items.Add(item);
@@ -166,7 +160,7 @@ namespace SuporteTI.Desktop
                 lblStaConteudo.ForeColor = SystemColors.HotTrack; // azul (Highlight)
                 lblStaConteudo.BackColor = Color.Transparent;
             }
-            else if (string.Equals(chamado.StatusChamado, "Em andamento", StringComparison.OrdinalIgnoreCase))
+            else if (string.Equals(chamado.StatusChamado, "Em Andamento", StringComparison.OrdinalIgnoreCase))
             {
                 lblStaConteudo.ForeColor = Color.FromArgb(200, 120, 0); // laranja/amarelo escuro
                 lblStaConteudo.BackColor = Color.Transparent;
@@ -207,7 +201,7 @@ namespace SuporteTI.Desktop
                     IdChamado = chamado.IdChamado,
                     IdUsuario = _usuarioLogado.IdUsuario,
                     Mensagem = mensagem,
-                    Origem = "Técnico"
+                    Origem = "Tecnico"
                 };
 
                 bool sucesso = await _apiService.EnviarInteracaoAsync(dto);

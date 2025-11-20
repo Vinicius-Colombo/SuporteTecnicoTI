@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-
-namespace SuporteTI.Data.Models;
+﻿namespace SuporteTI.Data.Models;
 
 public partial class Iaprocessamento
 {

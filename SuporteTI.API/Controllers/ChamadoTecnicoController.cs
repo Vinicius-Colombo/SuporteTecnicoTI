@@ -34,7 +34,7 @@ namespace SuporteTI.API.Controllers
                 Descricao = c.Descricao,
                 Prioridade = c.Prioridade,
                 StatusChamado = c.StatusChamado,
-                DataAbertura = (DateTime)c.DataAbertura,
+                DataAbertura = c.DataAbertura ?? DateTime.MinValue,
                 Usuario = c.IdUsuarioNavigation == null ? null : new UsuarioReadDto
                 {
                     IdUsuario = c.IdUsuarioNavigation.IdUsuario,

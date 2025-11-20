@@ -170,7 +170,9 @@ namespace SuporteTI.Desktop
                     new JsonSerializerOptions { PropertyNameCaseInsensitive = true }) ?? new();
 
                 // ✅ mostra apenas ATIVOS
-                usuarios = usuarios.Where(u => u.Ativo).ToList();
+                usuarios = usuarios
+                    .Where(u => u.Ativo && !u.Tipo.Equals("IA", StringComparison.OrdinalIgnoreCase))
+                    .ToList();
 
                 if (!string.IsNullOrWhiteSpace(filtro))
                 {
@@ -328,7 +330,10 @@ namespace SuporteTI.Desktop
                 var usuarios = JsonSerializer.Deserialize<List<UsuarioReadDto>>(json,
                     new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
-                var desativados = usuarios?.Where(u => !u.Ativo).ToList() ?? new();
+                var desativados = usuarios?
+                    .Where(u => !u.Ativo && !u.Tipo.Equals("IA", StringComparison.OrdinalIgnoreCase))
+                    .ToList() ?? new();
+
 
                 // 🔹 Preenche apenas com as colunas desejadas: Id, Nome, Email
                 foreach (var u in desativados)

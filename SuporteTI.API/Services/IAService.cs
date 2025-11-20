@@ -4,6 +4,7 @@ using System.Text.Json;
 
 namespace SuporteTI.API.Services
 {
+    // Classe responsável pela comunicação com a API da OpenAI.
     public class IAService
     {
         private readonly HttpClient _httpClient;
@@ -16,6 +17,7 @@ namespace SuporteTI.API.Services
             _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _openAiApiKey);
         }
 
+        // Método para analisar a descrição do chamado e retornar categoria, solução e prioridade.
         public async Task<(string categoria, string solucao, string prioridade)> AnalisarChamadoAsync(string descricao)
         {
             string categoria = "Outros";
@@ -25,7 +27,7 @@ namespace SuporteTI.API.Services
             if (string.IsNullOrWhiteSpace(descricao))
                 descricao = "O usuário não forneceu detalhes do problema.";
 
-            // Prompt estruturado (em português)
+            // Prompt estruturado
             var prompt = $@"
                         Você é um assistente técnico especializado em suporte de TI.
                         Analise a descrição do chamado abaixo e gere uma resposta estruturada.
@@ -71,13 +73,13 @@ namespace SuporteTI.API.Services
 
                 if (!string.IsNullOrWhiteSpace(message))
                 {
-                    var cat = ExtrairCampo(message, "Categoria");
-                    var pri = ExtrairCampo(message, "Prioridade");
-                    var sol = ExtrairCampo(message, "Solução");
+                    var cate = ExtrairCampo(message, "Categoria");
+                    var prio = ExtrairCampo(message, "Prioridade");
+                    var solu = ExtrairCampo(message, "Solução");
 
-                    if (!string.IsNullOrWhiteSpace(cat)) categoria = cat;
-                    if (!string.IsNullOrWhiteSpace(pri)) prioridade = pri;
-                    if (!string.IsNullOrWhiteSpace(sol)) solucao = sol;
+                    if (!string.IsNullOrWhiteSpace(cate)) categoria = cate;
+                    if (!string.IsNullOrWhiteSpace(prio)) prioridade = prio;
+                    if (!string.IsNullOrWhiteSpace(solu)) solucao = solu;
                     else solucao = message.Trim();
                 }
             }

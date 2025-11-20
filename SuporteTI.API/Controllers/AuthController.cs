@@ -5,8 +5,6 @@ using SuporteTI.API.DTOs;
 using SuporteTI.API.Strategies;
 using SuporteTI.Data.Models;
 using System.IdentityModel.Tokens.Jwt;
-using System.Net;
-using System.Net.Mail;
 using System.Security.Claims;
 using System.Text;
 
@@ -25,7 +23,7 @@ namespace SuporteTI.API.Controllers
             _configuration = configuration;
         }
 
-
+        // Inserir email e senha para solicitar o código de verificação
         [HttpPost("solicitar-codigo")]
         public async Task<IActionResult> SolicitarCodigo([FromBody] SolicitarCodigoDto dto)
         {
@@ -43,9 +41,6 @@ namespace SuporteTI.API.Controllers
 
         }
 
-
-
-
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] LoginCodigoModel login)
         {
@@ -60,7 +55,7 @@ namespace SuporteTI.API.Controllers
             usuario.CodigoValidado = true;
             await _context.SaveChangesAsync();
 
-            // ✅ Claims (informações dentro do token)
+            // Claims (informações dentro do token)
             var claims = new[]
             {
                 new Claim(ClaimTypes.NameIdentifier, usuario.IdUsuario.ToString()),
@@ -69,7 +64,7 @@ namespace SuporteTI.API.Controllers
                 new Claim(ClaimTypes.Name, usuario.Nome),
             };
 
-            // ✅ Gera o token
+            // Gera o token
             var key = Encoding.UTF8.GetBytes(_configuration["Jwt:Key"] ?? string.Empty);
             var creds = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256);
 

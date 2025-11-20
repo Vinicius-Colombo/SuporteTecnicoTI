@@ -15,7 +15,8 @@ namespace SuporteTI.Desktop.Services
         {
             _httpClient = new HttpClient
             {
-                BaseAddress = new Uri("https://localhost:7177/api/")
+                BaseAddress = new Uri("https://suporteti-api.azurewebsites.net/api/")
+
             };
         }
 

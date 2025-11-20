@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-
+﻿// Usuário do sistema (cliente, técnico, administrador)
 namespace SuporteTI.Data.Models;
 
 public partial class Usuario
@@ -13,7 +11,7 @@ public partial class Usuario
 
     public string Senha { get; set; } = null!;
 
-    public string Tipo { get; set; } = null!;
+    public string Tipo { get; set; } = null!; // Cliente, Técnico, Administrador
 
     public bool? Ativo { get; set; }
 

@@ -402,13 +402,14 @@ namespace SuporteTI.Web.Controllers
                 return Json(Array.Empty<object>());
 
             // 🔹 Chama o novo endpoint da API pelo ApiService
-            var response = await _api.GetAsync($"Chamado/notificacoes/mensagens/{idCliente}");
+            var notificacoes = await _api.GetAsync<List<object>>(
+                $"Chamado/notificacoes/mensagens/{idCliente}");
 
-            if (!response.IsSuccessStatusCode)
+            if (notificacoes == null)
                 return Json(Array.Empty<object>());
 
-            var json = await response.Content.ReadAsStringAsync();
-            return Content(json, "application/json");
+            return Json(notificacoes);
+
         }
 
 

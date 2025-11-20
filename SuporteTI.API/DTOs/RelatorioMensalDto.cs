@@ -5,6 +5,6 @@
         public string Mes { get; set; } = string.Empty;
         public int TotalChamados { get; set; }
         public int ChamadosAbertos { get; set; }
-        public int ChamadosFechados { get; set; }
+        public int ChamadosEncerrados { get; set; }
     }
 }

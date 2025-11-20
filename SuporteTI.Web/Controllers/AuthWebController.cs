@@ -1,22 +1,19 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using SuporteTI.Web.DTOs;
 using SuporteTI.Web.Models;
-using System.Text.Json;
+using SuporteTI.Web.Services;
 
 namespace SuporteTI.Web.Controllers
 {
     public class AuthWebController : Controller
     {
-        private readonly HttpClient _httpClient;
+        private readonly ApiService _api;
         private readonly ILogger<AuthWebController> _logger;
 
-        public AuthWebController(ILogger<AuthWebController> logger)
+        public AuthWebController(ApiService api, ILogger<AuthWebController> logger)
         {
+            _api = api;
             _logger = logger;
-            _httpClient = new HttpClient
-            {
-                BaseAddress = new Uri("https://localhost:7177/api/")
-            };
         }
 
         // =====================================
@@ -40,37 +37,27 @@ namespace SuporteTI.Web.Controllers
             if (!ModelState.IsValid)
                 return View(model);
 
-            // 1️⃣ Valida usuário e senha
-            var response = await _httpClient.PostAsJsonAsync("Auth/validar-usuario", new
+            // Valida credenciais via API Azure
+            var usuario = await _api.PostAsync<LoginResponseDto>("Auth/validar-usuario", new
             {
                 Email = model.Email,
                 Senha = model.Senha
             });
 
-            if (!response.IsSuccessStatusCode)
+            if (usuario == null)
             {
                 ModelState.AddModelError("", "E-mail ou senha inválidos.");
                 return View(model);
             }
 
-            var json = await response.Content.ReadAsStringAsync();
-            var usuario = JsonSerializer.Deserialize<LoginResponseDto>(
-                json, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-
-            if (usuario == null)
-            {
-                ModelState.AddModelError("", "Erro ao obter dados do usuário.");
-                return View(model);
-            }
-
-            // 🔒 Apenas clientes podem acessar a Web
+            // Somente cliente acessa web
             if (!usuario.Tipo.Equals("Cliente", StringComparison.OrdinalIgnoreCase))
             {
                 ModelState.AddModelError("", "Somente clientes podem acessar o portal web.");
                 return View(model);
             }
 
-            // 2️⃣ Se o código já foi validado, entra direto (igual ao desktop)
+            // Se já validado, entra direto
             if (usuario.CodigoValidado)
             {
                 CriarSessao(usuario);
@@ -78,15 +65,14 @@ namespace SuporteTI.Web.Controllers
                 return RedirectToAction("Novo", "Cliente");
             }
 
-
-            // 3️⃣ Solicita envio do código se ainda não foi validado
-            var responseCodigo = await _httpClient.PostAsJsonAsync("Auth/solicitar-codigo", new
+            // Solicita envio de código
+            var codigoResp = await _api.PostAsync<object>("Auth/solicitar-codigo", new
             {
                 Email = model.Email,
                 Senha = model.Senha
             });
 
-            if (!responseCodigo.IsSuccessStatusCode)
+            if (codigoResp == null)
             {
                 ModelState.AddModelError("", "Erro ao solicitar código de verificação.");
                 return View(model);
@@ -94,6 +80,7 @@ namespace SuporteTI.Web.Controllers
 
             TempData["EmailCliente"] = model.Email;
             TempData["SenhaCliente"] = model.Senha;
+
             return RedirectToAction("ValidarCodigo");
         }
 
@@ -126,30 +113,19 @@ namespace SuporteTI.Web.Controllers
                 return View();
             }
 
-            var response = await _httpClient.PostAsJsonAsync("Auth/login", new
+            var usuario = await _api.PostAsync<LoginResponseDto>("Auth/login", new
             {
                 Email = email,
                 Codigo = codigo
             });
 
-            if (!response.IsSuccessStatusCode)
+            if (usuario == null)
             {
                 ModelState.AddModelError("", "Código inválido ou expirado.");
                 TempData.Keep();
                 return View();
             }
 
-            var json = await response.Content.ReadAsStringAsync();
-            var usuario = JsonSerializer.Deserialize<LoginResponseDto>(
-                json, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-
-            if (usuario == null)
-            {
-                ModelState.AddModelError("", "Erro ao validar o código.");
-                return View();
-            }
-
-            // ✅ Marca como validado na sessão e entra no sistema
             CriarSessao(usuario);
             HttpContext.Session.SetString("UltimaValidacao", DateTime.Now.ToString());
 
@@ -170,15 +146,9 @@ namespace SuporteTI.Web.Controllers
 
         public IActionResult Logout()
         {
-            // 🔹 Remove tudo da sessão atual
             HttpContext.Session.Clear();
-
-            // 🔹 Cria um novo cookie de sessão vazio
             Response.Cookies.Delete(".AspNetCore.Session");
-
-            // 🔹 Redireciona para tela de login limpa
             return RedirectToAction("Login", "AuthWeb");
         }
-
     }
 }

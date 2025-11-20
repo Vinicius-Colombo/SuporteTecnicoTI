@@ -32,8 +32,8 @@ namespace SuporteTI.API.Controllers
 
             // Valida se o chamado pode ser avaliado
             var status = chamado.StatusChamado.ToLower();
-            if (status != "fechado" && status != "resolvido")
-                return BadRequest("O chamado precisa estar fechado ou resolvido antes de avaliar.");
+            if (status != "encerrado" && status != "resolvido")
+                return BadRequest("O chamado precisa estar encerrado ou resolvido antes de avaliar.");
 
             // Valida nota
             if (dto.Nota < 1 || dto.Nota > 5)

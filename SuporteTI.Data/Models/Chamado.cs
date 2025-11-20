@@ -1,28 +1,27 @@
-﻿using System;
-using System.Collections.Generic;
-
+﻿//Responsavel pelos chamados 
 namespace SuporteTI.Data.Models
 {
     public partial class Chamado
     {
         public int IdChamado { get; set; }
-
-        public int IdUsuario { get; set; }
         public string Titulo { get; set; } = null!;
         public string Descricao { get; set; } = null!;
         public string Prioridade { get; set; } = null!;
         public string StatusChamado { get; set; } = null!;
         public DateTime? DataAbertura { get; set; }
         public DateTime? DataFechamento { get; set; }
+
+        // Relacionamentos
+        public int IdUsuario { get; set; }
         public int? IdTecnico { get; set; }
-
-        // ✅ Novo campo e navegação
         public int? IdCategoria { get; set; }
-        public virtual Categorium? IdCategoriaNavigation { get; set; }
 
+        // Navegações
+        public virtual Categorium? IdCategoriaNavigation { get; set; }
         public virtual Usuario? IdTecnicoNavigation { get; set; }
         public virtual Usuario IdUsuarioNavigation { get; set; } = null!;
 
+        // Coleções relacionadas
         public virtual ICollection<Anexo> Anexos { get; set; } = new List<Anexo>();
         public virtual ICollection<Avaliacao> Avaliacaos { get; set; } = new List<Avaliacao>();
         public virtual ICollection<Iaprocessamento> Iaprocessamentos { get; set; } = new List<Iaprocessamento>();

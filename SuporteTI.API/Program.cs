@@ -21,15 +21,19 @@ builder.Services.AddScoped<SuporteTI.API.Services.IAService>();
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline
+// Habilita Swagger sempre
+app.UseSwagger();
+app.UseSwaggerUI();
+
+// Impede execução local
 if (app.Environment.IsDevelopment())
 {
-    app.UseSwagger();
-    app.UseSwaggerUI();
+    throw new Exception("Esta API só pode ser executada na Azure.");
 }
 
-app.UseHttpsRedirection();
+//app.UseHttpsRedirection();
 
 app.MapControllers();
 
 app.Run();
+

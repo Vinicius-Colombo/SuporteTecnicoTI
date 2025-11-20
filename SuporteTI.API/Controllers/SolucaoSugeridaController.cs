@@ -40,99 +40,6 @@ namespace SuporteTI.API.Controllers
             return Ok(solucoes);
         }
 
-        // 🔹 POST: api/SolucaoSugerida
-        [HttpPost]
-        public async Task<ActionResult<ChamadoReadDto>> Criar([FromBody] ChamadoCreateDto dto)
-        {
-            if (dto == null)
-                return BadRequest("Chamado inválido.");
-
-            var usuario = await _context.Usuarios.FindAsync(dto.IdUsuario);
-            if (usuario == null)
-                return BadRequest("Usuário informado não existe.");
-
-            // 1️⃣ Cria o chamado inicial
-            var chamado = new Chamado
-            {
-                Titulo = dto.Titulo,
-                Descricao = dto.Descricao,
-                Prioridade = "Média",
-                StatusChamado = "Aberto",
-                DataAbertura = DateTime.Now,
-                IdUsuario = dto.IdUsuario
-            };
-
-            _context.Chamados.Add(chamado);
-            await _context.SaveChangesAsync();
-
-            // 2️⃣ IA analisa o texto do chamado
-            var (categoria, solucao, prioridade) = await _iaService.AnalisarChamadoAsync(dto.Descricao);
-            chamado.Prioridade = prioridade;
-
-            // 3️⃣ Associa categoria sugerida
-            var categoriaExistente = await _context.Categoria
-                .FirstOrDefaultAsync(c => c.Nome.ToLower() == categoria.ToLower());
-            if (categoriaExistente != null)
-                chamado.IdCategoria = categoriaExistente.IdCategoria;
-
-            await _context.SaveChangesAsync();
-
-            // 4️⃣ Registra o processamento da IA
-            var processamento = new Iaprocessamento
-            {
-                IdChamado = chamado.IdChamado,
-                EntradaTexto = dto.Descricao,
-                SaidaClassificacao = categoria,
-                SolucaoSugerida = solucao,
-                DataProcessamento = DateTime.Now
-            };
-            _context.Iaprocessamentos.Add(processamento);
-            await _context.SaveChangesAsync();
-
-            // 5️⃣ Cria a solução sugerida
-            var solucaoIA = new SolucaoSugeridum
-            {
-                IdChamado = chamado.IdChamado,
-                Titulo = $"Solução sugerida pela IA ({categoria})",
-                Conteudo = solucao,
-                Aceita = null,
-                DataCriacao = DateTime.Now
-            };
-            _context.SolucaoSugerida.Add(solucaoIA);
-            await _context.SaveChangesAsync();
-
-            // 6️⃣ Retorna DTO
-            var readDto = new ChamadoReadDto
-            {
-                IdChamado = chamado.IdChamado,
-                Titulo = chamado.Titulo,
-                Descricao = chamado.Descricao,
-                Prioridade = chamado.Prioridade,
-                StatusChamado = chamado.StatusChamado,
-                DataAbertura = chamado.DataAbertura ?? DateTime.Now,
-                Usuario = new UsuarioReadDto
-                {
-                    IdUsuario = usuario.IdUsuario,
-                    Nome = usuario.Nome,
-                    Email = usuario.Email,
-                    Tipo = usuario.Tipo,
-                    Ativo = usuario.Ativo ?? false,
-                    Cpf = usuario.Cpf,
-                    Telefone = usuario.Telefone
-                },
-                Categoria = chamado.IdCategoriaNavigation != null
-                    ? new CategoriaReadDto
-                    {
-                        IdCategoria = chamado.IdCategoriaNavigation.IdCategoria,
-                        Nome = chamado.IdCategoriaNavigation.Nome
-                    }
-                    : null
-            };
-
-            return CreatedAtAction(nameof(Listar), new { chamadoId = chamado.IdChamado }, readDto);
-        }
-
-        // 🔹 PUT: api/SolucaoSugerida/aceitar/{idChamado}
         // 🔹 PUT: api/SolucaoSugerida/aceitar/{idChamado}
         [HttpPut("aceitar/{idChamado}")]
         public async Task<ActionResult> Aceitar(int idChamado)
@@ -202,7 +109,7 @@ namespace SuporteTI.API.Controllers
                     Tecnico = u,
                     ChamadosAbertos = _context.Chamados.Count(c =>
                         c.IdTecnico == u.IdUsuario &&
-                        (c.StatusChamado == "Aberto" || c.StatusChamado == "Em andamento"))
+                        (c.StatusChamado == "Aberto" || c.StatusChamado == "Em Andamento"))
                 })
                 .OrderBy(t => t.ChamadosAbertos)
                 .Select(t => t.Tecnico)

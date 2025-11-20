@@ -50,21 +50,22 @@ namespace SuporteTI.API.Controllers
             // 🔹 Atualiza prioridade
             chamado.Prioridade = prioridadeSugerida;
 
-            // 🔹 Atribui categoria sugerida pela IA (1:N)
-            var categoria = await _context.Categoria.FirstOrDefaultAsync(c => c.Nome == categoriaSugerida);
+            // 🔹 Atribui categoria sugerida pela IA (com fallback)
+            var categoria = await _context.Categoria
+                .FirstOrDefaultAsync(c => c.Nome.ToLower() == categoriaSugerida.ToLower());
+
+            // 🔥 Se a IA mandar algo fora da lista (ex: "Problema de rede") → cai em "Outros"
             if (categoria == null)
             {
-                categoria = new Categorium { Nome = categoriaSugerida };
-                _context.Categoria.Add(categoria);
-                await _context.SaveChangesAsync();
+                categoria = await _context.Categoria
+                    .FirstOrDefaultAsync(c => c.Nome.ToLower() == "outros");
             }
 
-            // ✅ Atribui a categoria diretamente (1:N)
             chamado.IdCategoria = categoria.IdCategoria;
 
-            // 🔹 Seleciona técnico com menos chamados abertos/ativos
+            // 🔹 Seleciona técnico com menos chamados ativos
             var tecnicos = await _context.Usuarios
-                .Where(t => t.Tipo == "Tecnico")
+                .Where(t => t.Tipo.ToLower() == "tecnico")
                 .ToListAsync();
 
             if (tecnicos.Any())
@@ -75,13 +76,15 @@ namespace SuporteTI.API.Controllers
                         Tecnico = t,
                         Qtde = _context.Chamados.Count(ch =>
                             ch.IdTecnico == t.IdUsuario &&
-                            (ch.StatusChamado == "Aberto" || ch.StatusChamado == "Em andamento"))
+                            (ch.StatusChamado.Equals("Aberto", StringComparison.OrdinalIgnoreCase) ||
+                             ch.StatusChamado.Equals("Em Andamento", StringComparison.OrdinalIgnoreCase)))
                     })
                     .OrderBy(x => x.Qtde)
                     .First().Tecnico;
 
                 chamado.IdTecnico = tecnicoComMenosChamados.IdUsuario;
             }
+
 
             await _context.SaveChangesAsync();
 
