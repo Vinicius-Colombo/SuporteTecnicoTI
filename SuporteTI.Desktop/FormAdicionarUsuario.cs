@@ -28,7 +28,7 @@ namespace SuporteTI.Desktop
             btnCancelar.Click += BtnCancelar_Click;
         }
 
-        // 🔹 Evento de carregamento
+        // Evento de carregamento
         private async void FormAdicionarUsuario_Load(object? sender, EventArgs e)
         {
             await CarregarCategoriasAsync();
@@ -36,7 +36,7 @@ namespace SuporteTI.Desktop
             lblCategorias.Visible = false;
         }
 
-        // 🔹 Exibir campo de categorias apenas se for Técnico
+        // Exibir campo de categorias apenas se for Técnico
         private void cmbTipo_SelectedIndexChanged(object? sender, EventArgs e)
         {
             string tipoSelecionado = cmbTipo.SelectedItem?.ToString() ?? "";
@@ -47,7 +47,7 @@ namespace SuporteTI.Desktop
         }
 
 
-        // 🔹 Carrega categorias
+        // Carrega categorias
         private async Task CarregarCategoriasAsync()
         {
             try
@@ -70,19 +70,18 @@ namespace SuporteTI.Desktop
             }
         }
 
-        // 🔹 Botão Cancelar
+        // Botão Cancelar
         private void BtnCancelar_Click(object? sender, EventArgs e)
         {
             this.DialogResult = DialogResult.Cancel;
             this.Close();
         }
 
-        // 🔹 Botão Salvar
+        // Botão Salvar
         private async void btnSalvar_Click(object? sender, EventArgs e)
         {
             try
             {
-                // Validação básica
                 if (string.IsNullOrWhiteSpace(txbNome.Text))
                 {
                     MessageBox.Show("Informe o nome do usuário.", "Aviso", MessageBoxButtons.OK, MessageBoxIcon.Warning);
@@ -101,12 +100,10 @@ namespace SuporteTI.Desktop
                     return;
                 }
 
-                // 🔹 Limpa o CPF e telefone (remove caracteres não numéricos)
                 string cpfLimpo = new string(mtbCpf.Text.Where(char.IsDigit).ToArray());
                 string telefoneLimpo = new string(mtbTelefone.Text.Where(char.IsDigit).ToArray());
                 string endereco = textBox1.Text.Trim();
 
-                // 🔹 Converte data (MaskedTextBox → yyyy-MM-dd)
                 DateTime dataNascimento;
                 if (!DateTime.TryParseExact(maskedTextBox1.Text, "dd/MM/yyyy", null, System.Globalization.DateTimeStyles.None, out dataNascimento))
                 {
@@ -114,7 +111,6 @@ namespace SuporteTI.Desktop
                     return;
                 }
 
-                // Cria DTO
                 var usuarioDto = new UsuarioCreateDto
                 {
                     Nome = txbNome.Text.Trim(),
@@ -130,7 +126,6 @@ namespace SuporteTI.Desktop
                     Senha = "senha@123"
                 };
 
-                // Envia requisição para criar o usuário
                 var response = await _apiService.PostAsync("Usuario", usuarioDto);
                 if (!response.IsSuccessStatusCode)
                 {
@@ -141,7 +136,6 @@ namespace SuporteTI.Desktop
 
                 var json = await response.Content.ReadAsStringAsync();
 
-                // 🔹 Tenta extrair o ID diretamente do JSON retornado
                 int idUsuarioCriado = 0;
                 try
                 {
@@ -153,7 +147,6 @@ namespace SuporteTI.Desktop
                 }
                 catch { idUsuarioCriado = 0; }
 
-                // 🔹 Se falhar, tenta deserializar como DTO (fallback)
                 if (idUsuarioCriado == 0)
                 {
                     try
@@ -172,13 +165,13 @@ namespace SuporteTI.Desktop
                     return;
                 }
 
-                // 🔹 Se for técnico, vincula as categorias selecionadas
-                if (usuarioDto.Tipo == "Tecnico") // sem acento aqui!
+                // Se for técnico, vincula as categorias selecionadas
+                if (usuarioDto.Tipo == "Tecnico")
                 {
                     // Aguarda o EF terminar de persistir no banco
                     await Task.Delay(1000);
 
-                    // Revalida se o técnico existe
+
                     var verificaResp = await _apiService.GetAsync($"Usuario/{idUsuarioCriado}");
                     if (!verificaResp.IsSuccessStatusCode)
                     {

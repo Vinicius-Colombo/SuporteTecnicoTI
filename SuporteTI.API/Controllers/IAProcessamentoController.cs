@@ -32,11 +32,11 @@ namespace SuporteTI.API.Controllers
             if (chamado == null)
                 return NotFound("Chamado não encontrado.");
 
-            // 🔹 IA analisa o texto do chamado
+            // IA analisa o texto do chamado
             var (categoriaSugerida, solucaoSugerida, prioridadeSugerida) =
                 await _iaService.AnalisarChamadoAsync(dto.TextoEntrada ?? chamado.Descricao);
 
-            // 🔹 Registra o processamento
+            // Registra o processamento
             var proc = new Iaprocessamento
             {
                 IdChamado = chamado.IdChamado,
@@ -47,14 +47,14 @@ namespace SuporteTI.API.Controllers
             };
             _context.Iaprocessamentos.Add(proc);
 
-            // 🔹 Atualiza prioridade
+            // Atualiza prioridade
             chamado.Prioridade = prioridadeSugerida;
 
-            // 🔹 Atribui categoria sugerida pela IA (com fallback)
+            //  Atribui categoria sugerida pela IA (com fallback)
             var categoria = await _context.Categoria
                 .FirstOrDefaultAsync(c => c.Nome.ToLower() == categoriaSugerida.ToLower());
 
-            // 🔥 Se a IA mandar algo fora da lista (ex: "Problema de rede") → cai em "Outros"
+            // Se a IA mandar algo fora da lista (ex: "Problema de rede") - cai em "Outros"
             if (categoria == null)
             {
                 categoria = await _context.Categoria
@@ -63,7 +63,7 @@ namespace SuporteTI.API.Controllers
 
             chamado.IdCategoria = categoria.IdCategoria;
 
-            // 🔹 Seleciona técnico com menos chamados ativos
+            // Seleciona técnico com menos chamados ativos
             var tecnicos = await _context.Usuarios
                 .Where(t => t.Tipo.ToLower() == "tecnico")
                 .ToListAsync();
@@ -88,7 +88,7 @@ namespace SuporteTI.API.Controllers
 
             await _context.SaveChangesAsync();
 
-            // 🔹 Retorna a resposta para o front
+            // Retorna a resposta para o front
             return Ok(new IAResponseDto
             {
                 IdChamado = chamado.IdChamado,

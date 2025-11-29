@@ -38,7 +38,7 @@ namespace SuporteTI.Desktop
             await CarregarAnexosAsync();
         }
 
-        // 🔹 Configura o visual e as colunas do ListView
+        // Configura o visual e as colunas do ListView
         private void ConfigurarListView()
         {
             lvListaAnexos.View = View.Details;
@@ -55,7 +55,7 @@ namespace SuporteTI.Desktop
             lvListaAnexos.Columns.Add("Data Envio", 150, HorizontalAlignment.Center);
         }
 
-        // 🔹 Carrega os anexos do chamado
+        // Carrega os anexos do chamado
         private async Task CarregarAnexosAsync()
         {
             try
@@ -90,7 +90,7 @@ namespace SuporteTI.Desktop
             }
         }
 
-        // 🔹 Quando o usuário seleciona um anexo
+        // Quando o usuário seleciona um anexo
         private async void lvListaAnexos_SelectedIndexChanged(object sender, EventArgs e)
         {
             if (lvListaAnexos.SelectedItems.Count == 0)
@@ -130,7 +130,7 @@ namespace SuporteTI.Desktop
         }
 
 
-        // 🔹 Botão Baixar Anexo
+        // Botão Baixar Anexo
         private async void btnBaixar_Click(object sender, EventArgs e)
         {
             if (lvListaAnexos.SelectedItems.Count == 0)

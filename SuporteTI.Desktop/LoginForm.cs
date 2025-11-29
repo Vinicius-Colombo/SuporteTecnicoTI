@@ -39,7 +39,7 @@ namespace SuporteTI.Desktop
         }
 
 
-        // 📩 Botão "Entrar" (Solicita envio do código)
+        // Botão "Entrar" (Solicita envio do código)
         private async void btnLogin_Click(object sender, EventArgs e)
         {
             var email = txtEmail.Text.Trim();
@@ -59,7 +59,7 @@ namespace SuporteTI.Desktop
 
             try
             {
-                // 1️⃣ Valida usuário (sem gerar código ainda)
+                // Valida usuário (sem gerar código ainda)
                 var usuario = await _apiService.ValidarUsuarioAsync(loginRequest);
 
                 if (usuario == null)
@@ -68,25 +68,25 @@ namespace SuporteTI.Desktop
                     return;
                 }
 
-                // 2️⃣ Se for cliente, bloqueia imediatamente
+                // Se for cliente, bloqueia imediatamente
                 if (usuario.Tipo.Equals("Cliente", StringComparison.OrdinalIgnoreCase))
                 {
                     MessageBox.Show("Você não tem permissão para acessar o sistema.", "Acesso Negado", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                     return;
                 }
 
-                // 3️⃣ Solicita envio do código (somente Técnico/Admin)
+                // Solicita envio do código (somente Técnico/Admin)
                 var resposta = await _apiService.SolicitarCodigoAsync(loginRequest);
 
                 _email = email;
 
-                // 🔹 Se retornou LoginResponseDto → login direto
+                // Se retornou LoginResponseDto → login direto
                 if (resposta is LoginResponseDto loginDireto)
                 {
                     MessageBox.Show($"Bem-vindo, {loginDireto.Nome}!", "Login realizado", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     AbrirTelaPorTipo(loginDireto);
                 }
-                // 🔹 Se retornou string (mensagem normal)
+                // Se retornou string (mensagem normal)
                 else if (resposta is string mensagem)
                 {
                     MessageBox.Show(mensagem, "Informação", MessageBoxButtons.OK, MessageBoxIcon.Information);
@@ -105,9 +105,6 @@ namespace SuporteTI.Desktop
             }
         }
 
-
-
-        // ✅ Botão "Confirmar Código" (valida o código)
         private async void btnConfirmarCodigo_Click(object sender, EventArgs e)
         {
             var codigo = txtCodigo.Text.Trim();
@@ -128,7 +125,7 @@ namespace SuporteTI.Desktop
                     return;
                 }
 
-                // 🎯 Direciona conforme o tipo de usuário
+                // Direciona conforme o tipo de usuário
                 MessageBox.Show($"Tipo retornado: {result.Tipo}", "Depuração");
 
                 if (result.Tipo.Equals("Administrador", StringComparison.OrdinalIgnoreCase))

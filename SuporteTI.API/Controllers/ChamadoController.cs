@@ -19,7 +19,6 @@ namespace SuporteTI.API.Controllers
             _iaService = iaService;
         }
 
-        // Pesquisa todos os chamados
         [HttpGet]
         public async Task<ActionResult<IEnumerable<ChamadoReadDto>>> GetChamados()
         {
@@ -60,7 +59,6 @@ namespace SuporteTI.API.Controllers
             return Ok(chamadosDto);
         }
 
-        // Pesquisa chamado por ID
         [HttpGet("{id}")]
         public async Task<ActionResult<ChamadoReadDto>> GetChamado(int id)
         {
@@ -103,7 +101,6 @@ namespace SuporteTI.API.Controllers
             return Ok(dto);
         }
 
-        // Cria um novo chamado
         [HttpPost]
         public async Task<ActionResult<ChamadoReadDto>> PostChamado([FromBody] ChamadoCreateDto dto)
         {
@@ -114,7 +111,7 @@ namespace SuporteTI.API.Controllers
             if (usuario == null)
                 return BadRequest("Usuário informado não existe.");
 
-            // 1️⃣ Cria o chamado inicial
+
             var chamado = new Chamado
             {
                 Titulo = dto.Titulo,
@@ -145,7 +142,6 @@ namespace SuporteTI.API.Controllers
                     .FirstOrDefaultAsync(c => c.Nome.ToLower() == "outros");
             }
 
-            // Se existir mesmo assim, atribui ao chamado
             if (categoriaExistente != null)
             {
                 chamado.IdCategoria = categoriaExistente.IdCategoria;
@@ -154,7 +150,6 @@ namespace SuporteTI.API.Controllers
 
             await _context.SaveChangesAsync();
 
-            // Registra o processamento IA
             var processamento = new Iaprocessamento
             {
                 IdChamado = chamado.IdChamado,
@@ -166,7 +161,6 @@ namespace SuporteTI.API.Controllers
             _context.Iaprocessamentos.Add(processamento);
             await _context.SaveChangesAsync();
 
-            // Cria automaticamente uma Solução Sugerida
             var solucaoIA = new SolucaoSugeridum
             {
                 IdChamado = chamado.IdChamado,
@@ -178,7 +172,6 @@ namespace SuporteTI.API.Controllers
             _context.SolucaoSugerida.Add(solucaoIA);
             await _context.SaveChangesAsync();
 
-            // Registra a mensagem da IA como interação no histórico
             if (!string.IsNullOrWhiteSpace(solucao))
             {
                 var interacaoIA = new Interacao
@@ -194,7 +187,6 @@ namespace SuporteTI.API.Controllers
                 await _context.SaveChangesAsync();
             }
 
-            // Retorna DTO completo
             var readDto = new ChamadoReadDto
             {
                 IdChamado = chamado.IdChamado,
@@ -226,7 +218,6 @@ namespace SuporteTI.API.Controllers
             return CreatedAtAction(nameof(GetChamado), new { id = chamado.IdChamado }, readDto);
         }
 
-        // Edita um chamado existente
         [HttpPut("{id}")]
         public async Task<IActionResult> PutChamado(int id, [FromBody] ChamadoUpdateDto dto)
         {
@@ -250,7 +241,6 @@ namespace SuporteTI.API.Controllers
             else
                 chamado.DataFechamento = null;
 
-            // Atualiza categoria (nova estrutura 1:N)
             if (dto.IdCategoria.HasValue)
             {
                 chamado.IdCategoria = dto.IdCategoria;
@@ -261,7 +251,6 @@ namespace SuporteTI.API.Controllers
             return NoContent();
         }
 
-        // Deletar um chamado
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteChamado(int id)
         {
@@ -275,7 +264,6 @@ namespace SuporteTI.API.Controllers
             return NoContent();
         }
 
-        // Obter notificações de novas mensagens para o cliente
         [HttpGet("notificacoes/mensagens/{idCliente}")]
         public async Task<IActionResult> ObterNotificacoesMensagens(int idCliente)
         {

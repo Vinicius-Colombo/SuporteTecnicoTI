@@ -16,7 +16,6 @@ namespace SuporteTI.API.Controllers
             _context = context;
         }
 
-        // 🔹 GET: api/ChamadoTecnico/{idTecnico}
         // Lista chamados atribuídos a um técnico (apenas abertos e em andamento)
         [HttpGet("{idTecnico}")]
         public async Task<ActionResult<IEnumerable<ChamadoReadDto>>> GetChamadosTecnico(int idTecnico)
@@ -46,7 +45,6 @@ namespace SuporteTI.API.Controllers
             return Ok(chamadosDto);
         }
 
-        // 🔹 GET: api/ChamadoTecnico/detalhes/{idChamado}
         // Retorna detalhes do chamado + histórico de mensagens
         [HttpGet("detalhes/{idChamado}")]
         public async Task<ActionResult<object>> GetDetalhesChamado(int idChamado)
@@ -93,7 +91,6 @@ namespace SuporteTI.API.Controllers
             });
         }
 
-        // 🔹 POST: api/ChamadoTecnico/mensagem/{idChamado}
         // Envia uma nova mensagem e atualiza o status automaticamente
         [HttpPost("mensagem/{idChamado}")]
         public async Task<IActionResult> EnviarMensagem(int idChamado, [FromBody] InteracaoCreateDto dto)
@@ -118,12 +115,11 @@ namespace SuporteTI.API.Controllers
                 chamado.StatusChamado = "Em Andamento";
  
             await _context.SaveChangesAsync();
-            await _context.Entry(chamado).ReloadAsync(); // garante atualização do estado no banco
+            await _context.Entry(chamado).ReloadAsync();
 
             return Ok("Mensagem enviada e status atualizado (se aplicável).");
         }
 
-        // 🔹 PUT: api/ChamadoTecnico/encerrar/{idChamado}
         // Encerra o chamado como resolvido ou encerrado sem solução
         [HttpPut("encerrar/{idChamado}")]
         public async Task<IActionResult> EncerrarChamado(int idChamado, [FromBody] EncerrarChamadoDto dto)

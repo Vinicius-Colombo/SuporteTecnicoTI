@@ -8,7 +8,7 @@
         <form id="avaliacao-form" method="post" asp-controller="Cliente" asp-action="EnviarAvaliacao">
             <input type="hidden" name="IdChamado" value="@Model.IdChamado" />
 
-            <!-- ⭐ Estrelas -->
+            <!-- Estrelas -->
             <div class="avaliacao-stars">
                 <input type="radio" id="star5" name="Nota" value="5"><label for="star5">&#9733;</label>
                 <input type="radio" id="star4" name="Nota" value="4"><label for="star4">&#9733;</label>
@@ -17,7 +17,7 @@
                 <input type="radio" id="star1" name="Nota" value="1"><label for="star1">&#9733;</label>
             </div>
 
-            <!-- 💬 Comentário -->
+            <!-- Comentário -->
             <textarea name="Comentario" class="form-control" rows="3" placeholder="Deixe um comentário (opcional)..."
                       style="resize:none;margin-top:10px;"></textarea>
 
@@ -75,7 +75,7 @@
         font-size: 1.2rem;
     }
 
-    /* ⭐ Estrelas */
+    /* Estrelas */
     .avaliacao-stars {
         display: flex;
         flex-direction: row-reverse;

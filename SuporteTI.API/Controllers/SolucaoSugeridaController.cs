@@ -19,7 +19,6 @@ namespace SuporteTI.API.Controllers
             _iaService = iaService;
         }
 
-        // 🔹 GET: api/SolucaoSugerida/{chamadoId}
         [HttpGet("{chamadoId}")]
         public async Task<ActionResult<IEnumerable<SolucaoSugeridaReadDto>>> Listar(int chamadoId)
         {
@@ -40,7 +39,6 @@ namespace SuporteTI.API.Controllers
             return Ok(solucoes);
         }
 
-        // 🔹 PUT: api/SolucaoSugerida/aceitar/{idChamado}
         [HttpPut("aceitar/{idChamado}")]
         public async Task<ActionResult> Aceitar(int idChamado)
         {
@@ -57,7 +55,6 @@ namespace SuporteTI.API.Controllers
             solucao.Aceita = true;
             chamado.StatusChamado = "Resolvido";
 
-            // ✅ Garante que a data de fechamento seja registrada
             chamado.DataFechamento = DateTime.Now;
 
             await _context.SaveChangesAsync();
@@ -70,8 +67,6 @@ namespace SuporteTI.API.Controllers
             });
         }
 
-
-        // 🔹 PUT: api/SolucaoSugerida/rejeitar/{idChamado}
         [HttpPut("rejeitar/{idChamado}")]
         public async Task<ActionResult> Rejeitar(int idChamado)
         {
@@ -119,7 +114,7 @@ namespace SuporteTI.API.Controllers
                 return BadRequest("Não foi possível determinar um técnico disponível.");
 
             chamado.IdTecnico = tecnicoMenosOcupado.IdUsuario;
-            chamado.StatusChamado = "Aberto"; // 👈 mantém aberto até o técnico responder
+            chamado.StatusChamado = "Aberto"; // mantém aberto até o técnico responder
 
             await _context.SaveChangesAsync();
 

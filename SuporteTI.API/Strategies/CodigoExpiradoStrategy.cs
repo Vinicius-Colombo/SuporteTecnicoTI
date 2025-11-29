@@ -1,9 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using System;
-using System.Threading.Tasks;
 using SuporteTI.Data.Models;
-using SuporteTI.API; // ajuste namespace conforme seu projeto
-using Microsoft.Extensions.Configuration;
+
 
 namespace SuporteTI.API.Strategies
 {
@@ -27,9 +24,6 @@ namespace SuporteTI.API.Strategies
             usuario.CodigoValidado = false;
 
             await _context.SaveChangesAsync();
-
-            // TODO: enviar e-mail (coloque seu serviço de e-mail aqui)
-            // Exemplo (comentado): await _emailService.EnviarCodigoAsync(usuario.Email, codigo);
 
             return new OkObjectResult(new { Mensagem = "Código de verificação enviado com sucesso!" });
         }

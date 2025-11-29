@@ -300,9 +300,7 @@
     </div>
 
     <script>
-        // ==========================
-        // 👤 Menu do perfil
-        // ==========================
+        // Menu do perfil
         const btnProfile = document.getElementById('btnProfile');
         const menuProfile = document.getElementById('menuProfile');
         if (btnProfile) {
@@ -316,9 +314,8 @@
         }
     </script>
     <script>
-        // ==========================
-        // 🔔 Notificações unificadas (mensagens + avaliações)
-        // ==========================
+
+        // Notificações (mensagens + avaliações)
         const btnNotif = document.getElementById('btnNotif');
         const notifMenu = document.getElementById('notifMenu');
         const notifCount = document.getElementById('notifCount');
@@ -367,7 +364,7 @@
             }
         }
 
-        // 🔔 Buscar notificações do backend
+        // Buscar notificações do backend
         async function carregarNotificacoes() {
             try {
                 const [respMsg, respAvaliacao] = await Promise.all([
@@ -434,14 +431,14 @@
             }
         }
 
-        // ✅ Marca como lida
+        // Marca como lida
         function marcarNotificacaoVista(tipo, id) {
             if (tipo === "mensagem") addMsgVista(id);
             else if (tipo === "avaliacao") addChamadoAvaliado(id);
             setNotifCount(0);
         }
 
-        // ⏱️ Executa ao carregar e a cada 30s
+        // Executa ao carregar e a cada 30s
         window.addEventListener("load", carregarNotificacoes);
         setInterval(carregarNotificacoes, 30000);
     </script>

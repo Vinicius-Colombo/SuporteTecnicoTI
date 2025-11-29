@@ -1,11 +1,9 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using System.Threading.Tasks;
 using System.Security.Claims;
 using System.IdentityModel.Tokens.Jwt;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using SuporteTI.Data.Models;
-using Microsoft.Extensions.Configuration;
 using SuporteTI.API.DTOs;
 
 namespace SuporteTI.API.Strategies

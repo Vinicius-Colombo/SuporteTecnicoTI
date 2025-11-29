@@ -11,7 +11,7 @@ namespace SuporteTI.Desktop.DTOs
         public string Email { get; set; } = string.Empty;
 
         [StringLength(100, MinimumLength = 6)]
-        public string Senha { get; set; } = string.Empty; // → no backend, armazene hash
+        public string Senha { get; set; } = string.Empty;
 
         [Required]
         public string Tipo { get; set; } = "Cliente";

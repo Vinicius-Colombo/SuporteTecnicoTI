@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using SuporteTI.Data.Models;
 using SuporteTI.API.DTOs;
+using SuporteTI.API.Services;
 
 namespace SuporteTI.API.Controllers
 {
@@ -10,19 +11,19 @@ namespace SuporteTI.API.Controllers
     public class UsuarioController : ControllerBase
     {
         private readonly SuporteTiDbContext _context;
+        private readonly IEmailService _emailService;
 
-        public UsuarioController(SuporteTiDbContext context)
+        public UsuarioController(SuporteTiDbContext context, IEmailService emailService)
         {
             _context = context;
+            _emailService = emailService;
         }
 
-        // GET: api/Usuario
         [HttpGet]
         public async Task<ActionResult<IEnumerable<UsuarioReadDto>>> GetUsuarios()
         {
             var usuarios = await _context.Usuarios.ToListAsync();
 
-            // Mapeamento manual para o DTO de leitura
             var usuariosDto = usuarios.Select(static u => new UsuarioReadDto
             {
                 IdUsuario = u.IdUsuario,
@@ -37,7 +38,6 @@ namespace SuporteTI.API.Controllers
             return Ok(usuariosDto);
         }
 
-        // GET: api/Usuario/5
         [HttpGet("{id}")]
         public async Task<ActionResult<UsuarioReadDto>> GetUsuario(int id)
         {
@@ -62,7 +62,6 @@ namespace SuporteTI.API.Controllers
             });
         }
 
-        // POST: api/Usuario
         [HttpPost]
         public async Task<ActionResult<UsuarioReadDto>> PostUsuario([FromBody] UsuarioCreateDto dto)
         {
@@ -71,20 +70,17 @@ namespace SuporteTI.API.Controllers
                 if (!ModelState.IsValid)
                     return BadRequest("Os dados informados são inválidos.");
 
-                // 🔹 Validação de CPF, se informado
                 if (!string.IsNullOrWhiteSpace(dto.Cpf) && !CpfValidator.IsValid(dto.Cpf))
                     return BadRequest("CPF inválido.");
 
-                // 🔹 Gera uma senha automática de 6 dígitos numéricos
                 var random = new Random();
                 var senhaGerada = random.Next(100000, 999999).ToString();
 
-                // 🔹 Cria o objeto usuário com a senha gerada
                 var usuario = new Usuario
                 {
                     Nome = dto.Nome.Trim(),
                     Email = dto.Email.Trim(),
-                    Senha = senhaGerada, // salva a senha gerada no banco
+                    Senha = senhaGerada,
                     Tipo = dto.Tipo,
                     Cpf = dto.Cpf,
                     Telefone = dto.Telefone,
@@ -98,13 +94,24 @@ namespace SuporteTI.API.Controllers
                 _context.Usuarios.Add(usuario);
                 await _context.SaveChangesAsync();
 
-                // 🔹 (Opcional futuramente) Envio de e-mail comentado
-                /*
-                await _emailService.EnviarEmailAsync(usuario.Email, "Conta criada com sucesso",
-                    $"Olá {usuario.Nome}, sua conta foi criada com sucesso.\nSua senha de acesso é: {senhaGerada}");
-                */
+                // Envia e-mail com a senha gerada (async, aguardamos pra garantir envio durante testes)
+                try
+                {
+                    var subject = "Sua conta foi criada - SuporteTI";
+                    var body = $@"
+                        <p>Olá {usuario.Nome},</p>
+                        <p>Sua conta no sistema SuporteTI foi criada com sucesso.</p>
+                        <p><strong>Sua senha:</strong> {senhaGerada}</p>
+                        <br/>
+                        <p>Atenciosamente,<br/>Equipe SuporteTI</p>";
 
-                // 🔹 Retorno incluindo a senha gerada (somente para testes)
+                    await _emailService.SendEmailAsync(usuario.Email, subject, body);
+                }
+                catch (Exception emailEx)
+                {
+                    return StatusCode(500, $"Usuário criado, mas falha ao enviar e-mail: {emailEx.Message}");
+                }
+
                 return Ok(new
                 {
                     usuario.IdUsuario,
@@ -123,8 +130,6 @@ namespace SuporteTI.API.Controllers
             }
         }
 
-
-        // PUT: api/Usuario/5
         [HttpPut("{id}")]
         public async Task<IActionResult> PutUsuario(int id, [FromBody] UsuarioUpdateDto dto)
         {
@@ -154,8 +159,6 @@ namespace SuporteTI.API.Controllers
             return NoContent();
         }
 
-
-        // DELETE: api/Usuario/5
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteUsuario(int id)
         {

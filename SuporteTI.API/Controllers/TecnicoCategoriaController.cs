@@ -16,7 +16,6 @@ namespace SuporteTI.API.Controllers
             _context = context;
         }
 
-        // 🔹 GET: api/TecnicoCategoria
         [HttpGet]
         public async Task<ActionResult<IEnumerable<TecnicoCategoriaReadDto>>> GetVinculos()
         {
@@ -56,8 +55,6 @@ namespace SuporteTI.API.Controllers
             return Ok(vinculos);
         }
 
-
-        // 🔹 POST: api/TecnicoCategoria
         [HttpPost]
         public async Task<ActionResult> Vincular([FromBody] TecnicoCategoriaCreateDto dto)
         {
@@ -93,7 +90,6 @@ namespace SuporteTI.API.Controllers
             });
         }
 
-        // 🔹 DELETE: api/TecnicoCategoria/{idTecnico}/{idCategoria}
         [HttpDelete("{idTecnico}/{idCategoria}")]
         public async Task<ActionResult> Desvincular(int idTecnico, int idCategoria)
         {

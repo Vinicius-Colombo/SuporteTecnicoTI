@@ -17,10 +17,10 @@ namespace SuporteTI.Desktop
 
             this.Text = $"Painel do Administrador - {_usuarioLogado.Nome}";
 
-            // 🔹 Evento do clique no ícone de perfil
+            // Evento do clique no ícone de perfil
             pbPerfil.Click += PbPerfil_Click;
 
-            // 🔹 Eventos já existentes
+            // Eventos já existentes
             this.Load += MainFormAdmin_Load;
             dgvResultadoPesquisa.CellContentClick += DgvResultadoPesquisa_CellContentClick;
             dgvDesativadas.CellContentClick += dgvDesativadas_CellContentClick;
@@ -40,13 +40,11 @@ namespace SuporteTI.Desktop
 
         }
 
-        // 🔹 Exibe o mini formulário de perfil ao clicar no ícone
+        // Exibe o mini formulário de perfil ao clicar no ícone
         private void PbPerfil_Click(object? sender, EventArgs e)
         {
-            // Cria o mini perfil e mostra próximo ao ícone
             var perfilForm = new PerfilMiniForm(_usuarioLogado);
 
-            // Define a posição — ao lado do ícone de perfil
             var pos = pbPerfil.PointToScreen(Point.Empty);
             perfilForm.StartPosition = FormStartPosition.Manual;
             perfilForm.Location = new Point(pos.X + pbPerfil.Width - perfilForm.Width, pos.Y + pbPerfil.Height);
@@ -73,14 +71,13 @@ namespace SuporteTI.Desktop
 
         private async void txbPesquisar_TextChanged(object? sender, EventArgs e)
         {
-            if (_pesquisando) return; // Evita chamadas simultâneas duplicadas
+            if (_pesquisando) return; 
             _pesquisando = true;
 
             try
             {
                 string termo = txbPesquisar.Text.Trim();
 
-                // 🔹 Se o campo estiver vazio → mostra todos os ativos
                 if (string.IsNullOrWhiteSpace(termo))
                 {
                     dgvResultadoPesquisa.Rows.Clear();
@@ -88,7 +85,6 @@ namespace SuporteTI.Desktop
                 }
                 else
                 {
-                    // 🔹 Pesquisa filtrando somente usuários ativos
                     await BuscarUsuariosAsync(termo);
                 }
             }
@@ -137,12 +133,12 @@ namespace SuporteTI.Desktop
 
 
 
-        // Adicionar Usuário
+
         private void BtnAdicionarUsuario_Click(object? sender, EventArgs e)
         {
             var form = new FormAdicionarUsuario();
 
-            // 🔹 Atualiza as listas somente se o cadastro for concluído com sucesso
+            // Atualiza as listas somente se o cadastro for concluído com sucesso
             form.FormClosed += async (sender, args) =>
             {
                 if (form.DialogResult == DialogResult.OK)
@@ -152,10 +148,6 @@ namespace SuporteTI.Desktop
             form.ShowDialog();
         }
 
-
-
-        // 🔹 Carrega todos os usuários no grid principal (dgvResultadoPesquisa)
-        // 🔹 Carrega e filtra os usuários
         private async Task CarregarUsuariosAsync(string? filtro = null)
         {
             try
@@ -169,7 +161,7 @@ namespace SuporteTI.Desktop
                 var usuarios = JsonSerializer.Deserialize<List<UsuarioReadDto>>(json,
                     new JsonSerializerOptions { PropertyNameCaseInsensitive = true }) ?? new();
 
-                // ✅ mostra apenas ATIVOS
+                // mostra apenas ATIVOS
                 usuarios = usuarios
                     .Where(u => u.Ativo && !u.Tipo.Equals("IA", StringComparison.OrdinalIgnoreCase))
                     .ToList();
@@ -205,8 +197,6 @@ namespace SuporteTI.Desktop
             }
         }
 
-
-
         private async void DgvResultadoPesquisa_CellContentClick(object sender, DataGridViewCellEventArgs e)
 {
             if (e.RowIndex < 0 || e.ColumnIndex < 0)
@@ -223,7 +213,6 @@ namespace SuporteTI.Desktop
                 {
                     Form formEdicao;
 
-                    // 🟢 Abre o form correto
                     if (tipo.Equals("Técnico", StringComparison.OrdinalIgnoreCase) ||
                         tipo.Equals("Tecnico", StringComparison.OrdinalIgnoreCase))
                         formEdicao = new FormEditarTecnico(idUsuario);
@@ -232,7 +221,6 @@ namespace SuporteTI.Desktop
 
                     var result = formEdicao.ShowDialog();
 
-                    // 🔄 Só atualiza se realmente editou (OK)
                     if (result == DialogResult.OK)
                         await AtualizarListasUsuariosAsync();
                 }
@@ -251,7 +239,7 @@ namespace SuporteTI.Desktop
 
                     try
                     {
-                        // 1) Obter dados atuais do usuário
+                        // Obter dados atuais do usuário
                         var respGet = await _apiService.GetAsync($"Usuario/{idUsuario}");
                         if (!respGet.IsSuccessStatusCode)
                         {
@@ -271,7 +259,7 @@ namespace SuporteTI.Desktop
                             return;
                         }
 
-                        // 2) Montar DTO completo com Ativo=false
+                        // Montar DTO completo com Ativo=false
                         var dto = new UsuarioUpdateDto
                         {
                             IdUsuario = usuario.IdUsuario,
@@ -282,7 +270,7 @@ namespace SuporteTI.Desktop
                             Ativo = false
                         };
 
-                        // 3) Atualizar
+                        // Atualizar
                         var respPut = await _apiService.PutAsync($"Usuario/{idUsuario}", dto);
                         if (!respPut.IsSuccessStatusCode)
                         {
@@ -314,9 +302,6 @@ namespace SuporteTI.Desktop
             }
         }
 
-
-
-        // 🔹 Carrega usuários desativados
         private async Task CarregarUsuariosDesativadosAsync()
         {
             try
@@ -335,7 +320,7 @@ namespace SuporteTI.Desktop
                     .ToList() ?? new();
 
 
-                // 🔹 Preenche apenas com as colunas desejadas: Id, Nome, Email
+                // Preenche apenas com as colunas desejadas: Id, Nome, Email
                 foreach (var u in desativados)
                 {
                     dgvDesativadas.Rows.Add(u.IdUsuario, u.Nome, u.Email);
@@ -362,7 +347,6 @@ namespace SuporteTI.Desktop
                 var usuarios = JsonSerializer.Deserialize<List<UsuarioReadDto>>(json,
                     new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
-                // 🔹 Filtra apenas desativados
                 var desativados = usuarios?
                     .Where(u => !u.Ativo &&
                                 (string.IsNullOrWhiteSpace(termo)
@@ -371,7 +355,6 @@ namespace SuporteTI.Desktop
                                  || u.IdUsuario.ToString().Contains(termo)))
                     .ToList() ?? new();
 
-                // 🔹 Preenche a grid sem duplicar
                 foreach (var u in desativados)
                 {
                     dgvDesativadas.Rows.Add(u.IdUsuario, u.Nome, u.Email);
@@ -391,7 +374,7 @@ namespace SuporteTI.Desktop
 
 
 
-        // 🔹 Clique nas colunas ReativarConta / ApagarConta
+        // Clique nas colunas ReativarConta / ApagarConta
         private async void dgvDesativadas_CellContentClick(object sender, DataGridViewCellEventArgs e)
         {
             if (e.RowIndex < 0 || e.ColumnIndex < 0)
@@ -400,7 +383,6 @@ namespace SuporteTI.Desktop
             var coluna = dgvDesativadas.Columns[e.ColumnIndex].Name;
             var row = dgvDesativadas.Rows[e.RowIndex];
 
-            // ✅ Lê o ID direto da coluna "IdDesativado"
             if (!int.TryParse(row.Cells["IdDesativado"].Value?.ToString(), out int id))
             {
                 MessageBox.Show("Não foi possível identificar o usuário (ID inválido).", "Erro",
@@ -410,7 +392,6 @@ namespace SuporteTI.Desktop
 
             string nome = row.Cells["NomeDesativado"].Value?.ToString() ?? "";
 
-            // 🟩 Reativar Conta
             if (coluna == "ReativarConta")
             {
                 var confirmar = MessageBox.Show(
@@ -423,7 +404,6 @@ namespace SuporteTI.Desktop
 
                 try
                 {
-                    // 🔹 Primeiro busca o usuário atual
                     var respGet = await _apiService.GetAsync($"Usuario/{id}");
                     if (!respGet.IsSuccessStatusCode)
                     {
@@ -443,7 +423,6 @@ namespace SuporteTI.Desktop
                         return;
                     }
 
-                    // 🔹 Monta o DTO completo com os dados existentes
                     var dto = new UsuarioUpdateDto
                     {
                         IdUsuario = usuario.IdUsuario,
@@ -454,14 +433,12 @@ namespace SuporteTI.Desktop
                         Ativo = true
                     };
 
-                    // 🔹 Envia para a API
                     var response = await _apiService.PutAsync($"Usuario/{id}", dto);
                     if (response.IsSuccessStatusCode)
                     {
                         MessageBox.Show("Conta reativada com sucesso!", "Sucesso",
                             MessageBoxButtons.OK, MessageBoxIcon.Information);
 
-                        // Atualiza os dois grids
                         await CarregarUsuariosDesativadosAsync();
                         await CarregarUsuariosAsync(txbPesquisar.Text.Trim());
                     }
@@ -479,7 +456,6 @@ namespace SuporteTI.Desktop
                 }
             }
 
-            // 🟥 Apagar Conta
             else if (coluna == "ApagarConta")
             {
                 var confirmar = MessageBox.Show(
@@ -498,7 +474,6 @@ namespace SuporteTI.Desktop
                         MessageBox.Show("Conta excluída com sucesso!", "Sucesso",
                             MessageBoxButtons.OK, MessageBoxIcon.Information);
 
-                        // Atualiza os dois grids
                         await CarregarUsuariosDesativadosAsync();
                         await CarregarUsuariosAsync(txbPesquisar.Text.Trim());
                     }
@@ -525,7 +500,7 @@ namespace SuporteTI.Desktop
             string columnName = dgvResultadoPesquisa.Columns[e.ColumnIndex].Name;
 
             if (columnName != "Editar" && columnName != "Desativar")
-                return; // ✅ só pinta essas duas colunas
+                return;
 
             e.Paint(e.CellBounds, DataGridViewPaintParts.All);
 
@@ -556,7 +531,7 @@ namespace SuporteTI.Desktop
             string columnName = dgvDesativadas.Columns[e.ColumnIndex].Name;
 
             if (columnName != "ReativarConta" && columnName != "ApagarConta")
-                return; // ✅ só pinta essas duas colunas
+                return;
 
             e.Paint(e.CellBounds, DataGridViewPaintParts.All);
 
@@ -579,8 +554,7 @@ namespace SuporteTI.Desktop
             e.Handled = true;
         }
 
-
-        // 🔄 Atualiza todos os grids após qualquer mudança em usuários
+        // Atualiza todos os grids após qualquer mudança em usuários
         public async Task AtualizarListasUsuariosAsync()
         {
             await CarregarUsuariosAsync();
@@ -588,7 +562,6 @@ namespace SuporteTI.Desktop
 
             string termo = txbPesquisar.Text.Trim();
 
-            // 🔹 Só pesquisa se tiver texto digitado
             if (!string.IsNullOrWhiteSpace(termo))
                 await BuscarUsuariosAsync(termo);
         }
@@ -596,7 +569,7 @@ namespace SuporteTI.Desktop
 
         // AREA DE RELATÓRIOS
 
-        // 🔹 Carrega técnicos no ComboBox
+        // Carrega técnicos no ComboBox
         private async Task CarregarTecnicosAsync()
         {
             try
@@ -608,7 +581,7 @@ namespace SuporteTI.Desktop
                 var usuarios = JsonSerializer.Deserialize<List<UsuarioReadDto>>(json,
                     new JsonSerializerOptions { PropertyNameCaseInsensitive = true }) ?? new();
 
-                // 🔹 Filtra apenas técnicos
+                // Filtra apenas técnicos
                 var tecnicos = usuarios
                     .Where(u => u.Tipo.Equals("Técnico", StringComparison.OrdinalIgnoreCase) ||
                                 u.Tipo.Equals("Tecnico", StringComparison.OrdinalIgnoreCase))
@@ -619,10 +592,8 @@ namespace SuporteTI.Desktop
                     })
                     .ToList();
 
-                // 🔹 Insere opção "Todos" no início
                 tecnicos.Insert(0, new { Nome = "Todos", Id = 0 });
 
-                // 🔹 Liga o combo com DataSource (certo jeito)
                 cmbTecnico.DataSource = tecnicos;
                 cmbTecnico.DisplayMember = "Nome";
                 cmbTecnico.ValueMember = "Id";
@@ -640,8 +611,6 @@ namespace SuporteTI.Desktop
             }
         }
 
-
-        // 🔹 Carrega categorias no ComboBox
         private async Task CarregarCategoriasAsync()
         {
             try
@@ -653,20 +622,17 @@ namespace SuporteTI.Desktop
                 var categorias = JsonSerializer.Deserialize<List<CategoriaReadDto>>(json,
                     new JsonSerializerOptions { PropertyNameCaseInsensitive = true }) ?? new();
 
-                // 🔹 Monta lista com "Todas" no topo
                 var listaCategorias = categorias
                     .Select(c => new { Nome = c.Nome, Id = c.IdCategoria })
                     .ToList();
 
                 listaCategorias.Insert(0, new { Nome = "Todas", Id = 0 });
 
-                // 🔹 Liga o ComboBox de forma segura (igual ao de técnico)
                 cmbCategoria.DataSource = listaCategorias;
                 cmbCategoria.DisplayMember = "Nome";
                 cmbCategoria.ValueMember = "Id";
                 cmbCategoria.SelectedIndex = 0;
 
-                // 🔹 AutoComplete
                 cmbCategoria.DropDownStyle = ComboBoxStyle.DropDown;
                 cmbCategoria.AutoCompleteMode = AutoCompleteMode.SuggestAppend;
                 cmbCategoria.AutoCompleteSource = AutoCompleteSource.ListItems;
@@ -678,8 +644,6 @@ namespace SuporteTI.Desktop
             }
         }
 
-
-        // 🔹 Carrega opções de prioridade
         private void CarregarPrioridades()
         {
             cmbPrioridade.Items.Clear();
@@ -747,14 +711,14 @@ namespace SuporteTI.Desktop
                 chartChamadosDiarios.Titles[0].Text = $"Chamados do dia {DateTime.Now:dd/MM/yyyy}";
                 chartChamadosDiarios.Refresh();
 
-                // 🔹 Mostra o valor acima de cada barra (rótulo)
+                // Mostra o valor acima de cada barra (rótulo)
                 chartChamadosDiarios.Series["SerieChamados"].IsValueShownAsLabel = true;
 
-                // 🔹 Ajusta estilo do texto dos valores
+                // Ajusta estilo do texto dos valores
                 chartChamadosDiarios.Series["SerieChamados"].Font = new Font("Segoe UI", 9, FontStyle.Bold);
                 chartChamadosDiarios.Series["SerieChamados"].LabelForeColor = Color.Black;
 
-                // 🔹 Centraliza o texto acima das barras
+                // Centraliza o texto acima das barras
                 chartChamadosDiarios.Series["SerieChamados"]["LabelStyle"] = "Top";
 
             }

@@ -51,15 +51,11 @@ namespace SuporteTI.Web.Services
             });
         }
 
-
-        // 🔹 Abrir Chamado (com ou sem anexo)
         public async Task<int?> AbrirChamadoAsync(int idUsuario, string titulo, string descricao, IFormFile? anexo)
         {
-            // 🔹 Sanitiza a descrição (remove caracteres quebrados e espaços invisíveis)
             descricao = descricao?.Normalize().Trim() ?? "";
             descricao = descricao.Replace("\r", " ").Replace("\n", " ");
 
-            // 🔹 Monta o objeto compatível com ChamadoCreateDto
             var dto = new
             {
                 Titulo = titulo,
@@ -69,7 +65,6 @@ namespace SuporteTI.Web.Services
                 Categoria = ""
             };
 
-            // 🔹 Serializa e envia
             var json = JsonSerializer.Serialize(dto, new JsonSerializerOptions
             {
                 PropertyNamingPolicy = JsonNamingPolicy.CamelCase
@@ -85,7 +80,6 @@ namespace SuporteTI.Web.Services
             using var doc = JsonDocument.Parse(jsonResult);
             var idChamado = doc.RootElement.GetProperty("idChamado").GetInt32();
 
-            // 🔹 Anexo opcional
             if (anexo != null)
             {
                 using var form = new MultipartFormDataContent();
@@ -103,7 +97,7 @@ namespace SuporteTI.Web.Services
         }
 
 
-        // 🔹 Histórico de Chamados
+        // Histórico de Chamados
         public async Task<List<ChamadoReadDto>> ObterChamadosAsync(int idUsuario)
         {
             var response = await _http.GetAsync($"{_baseUrl}/Chamado");
@@ -118,7 +112,7 @@ namespace SuporteTI.Web.Services
         }
 
 
-        // 🔹 Detalhes do Chamado
+        // Detalhes do Chamado
         public async Task<ChamadoReadDto?> ObterChamadoPorIdAsync(int id)
         {
             var response = await _http.GetAsync($"{_baseUrl}/Chamado/{id}");
@@ -130,7 +124,7 @@ namespace SuporteTI.Web.Services
                 new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
         }
 
-        // 🔹 Obter mensagens do chat
+        // Obter mensagens do chat
         public async Task<List<InteracaoReadDto>> ObterInteracoesPorChamadoAsync(int idChamado)
         {
             var response = await _http.GetAsync($"{_baseUrl}/Interacao/chamado/{idChamado}");
@@ -142,7 +136,6 @@ namespace SuporteTI.Web.Services
                 new JsonSerializerOptions { PropertyNameCaseInsensitive = true }) ?? new List<InteracaoReadDto>();
         }
 
-        // 🔹 Enviar mensagem
         public async Task<bool> EnviarMensagemAsync(InteracaoCreateDto dto)
         {
             var json = JsonSerializer.Serialize(dto);
@@ -152,7 +145,6 @@ namespace SuporteTI.Web.Services
             return response.IsSuccessStatusCode;
         }
 
-        // 🔹 Obter anexos
         public async Task<List<AnexoReadDto>> ObterAnexosPorChamadoAsync(int idChamado)
         {
             var response = await _http.GetAsync($"{_baseUrl}/Anexo/{idChamado}");
@@ -164,7 +156,6 @@ namespace SuporteTI.Web.Services
                 new JsonSerializerOptions { PropertyNameCaseInsensitive = true }) ?? new List<AnexoReadDto>();
         }
 
-        // 🔹 Enviar anexo
         public async Task<bool> EnviarAnexoAsync(int idChamado, IFormFile arquivo)
         {
             using var form = new MultipartFormDataContent();
@@ -179,7 +170,6 @@ namespace SuporteTI.Web.Services
             return response.IsSuccessStatusCode;
         }
 
-        // 🔹 Baixar anexo
         public async Task<(byte[] bytes, string nome, string tipo)> BaixarAnexoAsync(int idAnexo)
         {
             var response = await _http.GetAsync($"{_baseUrl}/Anexo/download/{idAnexo}");
@@ -195,7 +185,6 @@ namespace SuporteTI.Web.Services
             return (bytes, fileName, contentType);
         }
 
-        // 🔹 Avaliações
         public async Task<AvaliacaoReadDto?> ObterAvaliacaoPorChamadoAsync(int idChamado)
         {
             var resp = await _http.GetAsync($"{_baseUrl}/Avaliacao/{idChamado}");
@@ -215,21 +204,18 @@ namespace SuporteTI.Web.Services
             return resp.IsSuccessStatusCode;
         }
 
-        // ✅ Aceitar solução sugerida (ALTERADO)
         public async Task<bool> AceitarSolucaoAsync(int idChamado)
         {
             var response = await _http.PutAsync($"{_baseUrl}/SolucaoSugerida/aceitar/{idChamado}", null);
             return response.IsSuccessStatusCode;
         }
 
-        // ✅ Rejeitar solução sugerida (ALTERADO)
         public async Task<bool> RejeitarSolucaoAsync(int idChamado)
         {
             var response = await _http.PutAsync($"{_baseUrl}/SolucaoSugerida/rejeitar/{idChamado}", null);
             return response.IsSuccessStatusCode;
         }
 
-        // 🔹 Obter soluções sugeridas
         public async Task<List<SolucaoSugeridaReadDto>> ObterSolucoesPorChamadoAsync(int idChamado)
         {
             var response = await _http.GetAsync($"{_baseUrl}/SolucaoSugerida/{idChamado}");

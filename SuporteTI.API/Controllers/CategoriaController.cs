@@ -16,7 +16,6 @@ namespace SuporteTI.API.Controllers
             _context = context;
         }
 
-        // 🔹 GET: api/Categoria
         [HttpGet]
         public async Task<ActionResult<IEnumerable<CategoriaReadDto>>> GetCategorias()
         {
@@ -34,7 +33,6 @@ namespace SuporteTI.API.Controllers
             return Ok(categoriasDto);
         }
 
-        // 🔹 GET: api/Categoria/{id}
         [HttpGet("{id}")]
         public async Task<ActionResult<CategoriaReadDto>> GetCategoria(int id)
         {
@@ -52,7 +50,6 @@ namespace SuporteTI.API.Controllers
             return Ok(dto);
         }
 
-        // 🔹 POST: api/Categoria
         [HttpPost]
         public async Task<ActionResult<CategoriaReadDto>> PostCategoria([FromBody] CategoriaCreateDto dto)
         {
@@ -81,7 +78,6 @@ namespace SuporteTI.API.Controllers
             return CreatedAtAction(nameof(GetCategoria), new { id = categoria.IdCategoria }, readDto);
         }
 
-        // 🔹 PUT: api/Categoria/{id}
         [HttpPut("{id}")]
         public async Task<IActionResult> PutCategoria(int id, [FromBody] CategoriaCreateDto dto)
         {
@@ -92,7 +88,6 @@ namespace SuporteTI.API.Controllers
             if (categoria == null)
                 return NotFound("Categoria não encontrada.");
 
-            // Verifica duplicidade
             bool existe = await _context.Categoria.AnyAsync(c => c.Nome.ToLower() == dto.Nome.ToLower() && c.IdCategoria != id);
             if (existe)
                 return Conflict("Já existe outra categoria com esse nome.");
@@ -103,7 +98,6 @@ namespace SuporteTI.API.Controllers
             return NoContent();
         }
 
-        // 🔹 DELETE: api/Categoria/{id}
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteCategoria(int id)
         {

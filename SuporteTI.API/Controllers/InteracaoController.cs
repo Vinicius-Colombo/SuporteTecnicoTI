@@ -16,7 +16,6 @@ namespace SuporteTI.API.Controllers
             _context = context;
         }
 
-        // ✅ POST: api/Interacao
         [HttpPost]
         public async Task<ActionResult<InteracaoReadDto>> PostInteracao([FromBody] InteracaoCreateDto dto)
         {
@@ -38,7 +37,7 @@ namespace SuporteTI.API.Controllers
                 Mensagem = dto.Mensagem,
                 DataHora = DateTime.Now,
                 Origem = string.IsNullOrWhiteSpace(dto.Origem)
-                    ? usuario.Tipo // se não enviar origem, usa tipo do usuário (Cliente, Técnico, etc.)
+                    ? usuario.Tipo
                     : dto.Origem
             };
 
@@ -59,7 +58,6 @@ namespace SuporteTI.API.Controllers
             return CreatedAtAction(nameof(GetPorChamado), new { chamadoId = dto.IdChamado }, readDto);
         }
 
-        // ✅ GET: api/Interacao/chamado/{chamadoId}
         [HttpGet("chamado/{chamadoId}")]
         public async Task<ActionResult<IEnumerable<InteracaoReadDto>>> GetPorChamado(int chamadoId)
         {
