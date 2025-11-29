@@ -16,7 +16,6 @@ namespace SuporteTI.API.Controllers
             _context = context;
         }
 
-        // 🔹 POST: api/Anexo/{chamadoId}
         [HttpPost("{chamadoId}")]
         public async Task<ActionResult<AnexoReadDto>> Upload(int chamadoId, IFormFile arquivo)
         {
@@ -38,7 +37,7 @@ namespace SuporteTI.API.Controllers
             {
                 IdChamado = chamadoId,
                 NomeArquivo = arquivo.FileName,
-                CaminhoArquivo = Path.GetExtension(arquivo.FileName), // apenas extensão
+                CaminhoArquivo = Path.GetExtension(arquivo.FileName), 
                 Conteudo = conteudo,
                 DataEnvio = DateTime.Now
             };
@@ -55,7 +54,6 @@ namespace SuporteTI.API.Controllers
             });
         }
 
-        // 🔹 GET: api/Anexo/{chamadoId}
         [HttpGet("{chamadoId}")]
         public async Task<ActionResult<IEnumerable<AnexoReadDto>>> GetAnexosPorChamado(int chamadoId)
         {
@@ -76,7 +74,6 @@ namespace SuporteTI.API.Controllers
             return Ok(anexos);
         }
 
-        // 🔹 GET: api/Anexo/download/{id}
         [HttpGet("download/{id}")]
         public async Task<IActionResult> DownloadAnexo(int id)
         {
@@ -87,7 +84,6 @@ namespace SuporteTI.API.Controllers
             return File(anexo.Conteudo, "application/octet-stream", anexo.NomeArquivo);
         }
 
-        // 🔹 DELETE: api/Anexo/{id}
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteAnexo(int id)
         {

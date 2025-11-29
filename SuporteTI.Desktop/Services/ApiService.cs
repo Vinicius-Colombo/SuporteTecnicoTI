@@ -15,7 +15,7 @@ namespace SuporteTI.Desktop.Services
         {
             _httpClient = new HttpClient
             {
-                BaseAddress = new Uri("https://suporteti-api.azurewebsites.net/api/")
+                //BaseAddress =
 
             };
         }
@@ -37,12 +37,12 @@ namespace SuporteTI.Desktop.Services
             if (!response.IsSuccessStatusCode)
                 return null;
 
-            // ✅ Lê o conteúdo como string primeiro (para evitar o erro do Stream fechado)
+            // Lê o conteúdo como string primeiro (para evitar o erro do Stream fechado)
             var json = await response.Content.ReadAsStringAsync();
 
             try
             {
-                // ✅ Tenta converter para LoginResponseDto
+                // Tenta converter para LoginResponseDto
                 var dto = System.Text.Json.JsonSerializer.Deserialize<LoginResponseDto>(json, new System.Text.Json.JsonSerializerOptions
                 {
                     PropertyNameCaseInsensitive = true
@@ -53,10 +53,10 @@ namespace SuporteTI.Desktop.Services
             }
             catch
             {
-                // ignora e tenta como mensagem simples
+
             }
 
-            // ✅ Se não for um DTO, tenta ler mensagem simples
+            // Se não for um DTO, tenta ler mensagem simples
             try
             {
                 var messageObj = System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, string>>(json);
@@ -150,7 +150,7 @@ namespace SuporteTI.Desktop.Services
 
         // AREA RELACIONADA AO ADMINISTRADOR
 
-        // 🔹 Vincular técnico a uma categoria
+        // Vincular técnico a uma categoria
         public async Task VincularTecnicoCategoriaAsync(int idTecnico, int idCategoria)
         {
             var dto = new { IdTecnico = idTecnico, IdCategoria = idCategoria };
@@ -158,14 +158,14 @@ namespace SuporteTI.Desktop.Services
             response.EnsureSuccessStatusCode();
         }
 
-        // 🔹 Desvincular técnico de uma categoria
+        // Desvincular técnico de uma categoria
         public async Task DesvincularTecnicoCategoriaAsync(int idTecnico, int idCategoria)
         {
             var response = await _httpClient.DeleteAsync($"TecnicoCategoria/{idTecnico}/{idCategoria}");
             response.EnsureSuccessStatusCode();
         }
 
-        // 🔹 Listar categorias de um técnico (para preencher o clbCategorias)
+        // Listar categorias de um técnico (para preencher o clbCategorias)
         public async Task<List<TecnicoCategoriaReadDto>> ObterCategoriasDoTecnicoAsync(int idTecnico)
         {
             var response = await _httpClient.GetAsync("TecnicoCategoria");
@@ -179,7 +179,7 @@ namespace SuporteTI.Desktop.Services
         }
 
 
-        //Métodos genéricos para comunicação com a API
+        // Métodos genéricos para comunicação com a API
         public async Task<HttpResponseMessage> GetAsync(string endpoint)
         {
             return await _httpClient.GetAsync(endpoint);
@@ -200,7 +200,7 @@ namespace SuporteTI.Desktop.Services
             return await _httpClient.DeleteAsync(endpoint);
         }
 
-        // 🔹 Obtém relatório completo filtrado
+        // Obtém relatório completo filtrado
         public async Task<RelatorioResponseDto?> ObterRelatorioFiltradoAsync(RelatorioRequestDto filtros)
         {
             var response = await _httpClient.PostAsJsonAsync("Relatorio/filtrado", filtros);
@@ -213,7 +213,6 @@ namespace SuporteTI.Desktop.Services
 
             var json = await response.Content.ReadAsStringAsync();
 
-            // 🔹 Log temporário para debug (pode remover depois)
             Console.WriteLine(json);
 
             return JsonSerializer.Deserialize<RelatorioResponseDto>(json,

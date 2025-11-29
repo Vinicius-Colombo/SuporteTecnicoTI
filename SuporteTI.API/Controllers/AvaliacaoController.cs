@@ -16,7 +16,6 @@ namespace SuporteTI.API.Controllers
             _context = context;
         }
 
-        // 🔹 POST: api/Avaliacao
         [HttpPost]
         public async Task<ActionResult<AvaliacaoReadDto>> PostAvaliacao([FromBody] AvaliacaoCreateDto dto)
         {
@@ -45,7 +44,6 @@ namespace SuporteTI.API.Controllers
             if (avaliacaoExistente)
                 return Conflict("Este chamado já possui uma avaliação.");
 
-            // Cria entidade
             var avaliacao = new Avaliacao
             {
                 IdChamado = dto.IdChamado,
@@ -56,7 +54,6 @@ namespace SuporteTI.API.Controllers
             _context.Avaliacoes.Add(avaliacao);
             await _context.SaveChangesAsync();
 
-            // Retorna DTO
             var readDto = new AvaliacaoReadDto
             {
                 IdAvaliacao = avaliacao.IdAvaliacao,
@@ -68,7 +65,6 @@ namespace SuporteTI.API.Controllers
             return CreatedAtAction(nameof(GetAvaliacaoPorChamado), new { chamadoId = dto.IdChamado }, readDto);
         }
 
-        // 🔹 GET: api/Avaliacao/{chamadoId}
         [HttpGet("{chamadoId}")]
         public async Task<ActionResult<AvaliacaoReadDto>> GetAvaliacaoPorChamado(int chamadoId)
         {

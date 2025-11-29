@@ -37,7 +37,7 @@ namespace SuporteTI.Desktop
             await CarregarAvaliacoesAsync();
         }
 
-        // ===================== RELATÓRIO PRINCIPAL =====================
+        // RELATÓRIO PRINCIPAL 
         private async Task CarregarRelatorioAsync()
         {
             Cursor = Cursors.WaitCursor;
@@ -52,14 +52,14 @@ namespace SuporteTI.Desktop
                     return;
                 }
 
-                // === 1️⃣ RESUMO ===
+                // RESUMO
                 lblTotalChamadosValor.Text = resultado.Resumo.TotalChamados.ToString();
                 lTempoMedioValor.Text = resultado.Resumo.TempoMedioResolucao;
                 lblResolvidoPrazoValor.Text = resultado.Resumo.ResolvidosPrazo.ToString();
                 lblCategoriaValor.Text = resultado.Resumo.CategoriaMaisIncidente ?? "-";
                 lblTotalAvaliacoesValor.Text = resultado.Resumo.TotalAvaliacoes.ToString();
 
-                // === 2️⃣ TABELA DE CHAMADOS ===
+                // TABELA DE CHAMADOS
                 dgvChamadosDetalhados.Rows.Clear();
                 foreach (var c in resultado.Chamados)
                 {
@@ -75,7 +75,6 @@ namespace SuporteTI.Desktop
                 }
 
 
-                // === 4️⃣ RANKINGS ===
                 AtualizarRankings(resultado.Rankings);
             }
             catch (Exception ex)
@@ -89,7 +88,7 @@ namespace SuporteTI.Desktop
             }
         }
 
-        // ===================== RANKINGS =====================
+        // RANKINGS 
         private void AtualizarRankings(RankingsRelatorioDto rankings)
         {
             lvlDetalhesTecnicos.Items.Clear();
@@ -103,7 +102,7 @@ namespace SuporteTI.Desktop
         }
 
 
-        // ===================== AVALIAÇÕES =====================
+        // AVALIAÇÕES 
         private async Task CarregarAvaliacoesAsync()
         {
             try
@@ -159,7 +158,7 @@ namespace SuporteTI.Desktop
             }
         }
 
-        // ===================== PDF =====================
+        // PDF 
         private void BtnBaixarPDF_Click(object sender, EventArgs e)
         {
             Cursor = Cursors.WaitCursor;
@@ -170,22 +169,17 @@ namespace SuporteTI.Desktop
                     $"Relatorio_SuporteTI_{DateTime.Now:ddMMyyyy_HHmm}.pdf"
                 );
 
-                // ✅ Use namespaces completos de iTextSharp
                 var doc = new iTextSharp.text.Document(iTextSharp.text.PageSize.A4, 40, 40, 60, 60);
                 var writer = iTextSharp.text.pdf.PdfWriter.GetInstance(doc, new FileStream(filePath, FileMode.Create));
                 doc.Open();
 
-                // =========================
-                // 🔹 FONTES PADRÃO
-                // =========================
+                // FONTES PADRÃO
                 var fonteTitulo = new iTextSharp.text.Font(iTextSharp.text.Font.FontFamily.HELVETICA, 16, iTextSharp.text.Font.BOLD, iTextSharp.text.BaseColor.BLACK);
                 var fonteSubtitulo = new iTextSharp.text.Font(iTextSharp.text.Font.FontFamily.HELVETICA, 12, iTextSharp.text.Font.BOLD, new iTextSharp.text.BaseColor(30, 60, 150));
                 var fonteTexto = new iTextSharp.text.Font(iTextSharp.text.Font.FontFamily.HELVETICA, 10, iTextSharp.text.Font.NORMAL, iTextSharp.text.BaseColor.BLACK);
                 var fontePequena = new iTextSharp.text.Font(iTextSharp.text.Font.FontFamily.HELVETICA, 8, iTextSharp.text.Font.ITALIC, iTextSharp.text.BaseColor.GRAY);
 
-                // =========================
-                // 🔹 CABEÇALHO
-                // =========================
+                // CABEÇALHO
                 var titulo = new iTextSharp.text.Paragraph("SUPORTE TÉCNICO", fonteSubtitulo)
                 {
                     Alignment = iTextSharp.text.Element.ALIGN_RIGHT
@@ -205,18 +199,14 @@ namespace SuporteTI.Desktop
                 doc.Add(new iTextSharp.text.Chunk(linha));
                 doc.Add(new iTextSharp.text.Paragraph("\nResumo Geral", fonteSubtitulo));
 
-                // =========================
-                // 🔹 RESUMO
-                // =========================
+                // RESUMO
                 doc.Add(new iTextSharp.text.Paragraph($"• Total de Chamados: {lblTotalChamadosValor.Text}", fonteTexto));
                 doc.Add(new iTextSharp.text.Paragraph($"• Tempo Médio de Resolução: {lTempoMedioValor.Text}", fonteTexto));
                 doc.Add(new iTextSharp.text.Paragraph($"• Resolvidos no Prazo: {lblResolvidoPrazoValor.Text}", fonteTexto));
                 doc.Add(new iTextSharp.text.Paragraph($"• Categoria Mais Incidente: {lblCategoriaValor.Text}", fonteTexto));
                 doc.Add(new iTextSharp.text.Paragraph($"• Total de Avaliações: {lblTotalAvaliacoesValor.Text}\n\n", fonteTexto));
 
-                // =========================
-                // 🔹 TABELA DE CHAMADOS
-                // =========================
+                // TABELA DE CHAMADOS
                 doc.Add(new iTextSharp.text.Paragraph("\nChamados Detalhados", fonteSubtitulo));
                 var tabela = new iTextSharp.text.pdf.PdfPTable(dgvChamadosDetalhados.ColumnCount)
                 {
@@ -233,9 +223,7 @@ namespace SuporteTI.Desktop
 
                 doc.Add(tabela);
 
-                // =========================
-                // 🔹 RANKINGS
-                // =========================
+                // RANKINGS
                 doc.Add(new iTextSharp.text.Paragraph("\nRankings", fonteSubtitulo));
                 doc.Add(new iTextSharp.text.Paragraph("\nTécnicos com mais chamados:", fonteTexto));
                 foreach (ListViewItem item in lvlDetalhesTecnicos.Items)

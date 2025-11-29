@@ -25,7 +25,7 @@
         </span>
     </p>
 
-    <!-- 📎 Lista de Anexos -->
+    <!-- Lista de Anexos -->
     @if (Model.Anexos != null && Model.Anexos.Any())
     {
         <div style="margin-top:10px;padding:10px;border:1px solid #ccc;border-radius:8px;background-color:#f8f9fa;">
@@ -57,7 +57,7 @@
     }
 </div>
 
-<!-- 💬 Chat -->
+<!-- Chat -->
 <div id="chat-container"
      style="border:1px solid #ccc;border-radius:8px;height:420px;overflow-y:auto;padding:15px;background-color:#f5f6f8;">
     @await Html.PartialAsync("_ChatMensagens", Model)
@@ -82,7 +82,7 @@
 
 
 
-<!-- 📤 Enviar Anexo -->
+<!-- Enviar Anexo -->
 @if (Model.Chamado.StatusChamado?.ToLower() == "aberto" || Model.Chamado.StatusChamado?.ToLower() == "em andamento")
 {
     <form asp-controller="Cliente" asp-action="EnviarAnexo" method="post" enctype="multipart/form-data" style="margin-top:10px;">
@@ -97,7 +97,7 @@
     </form>
 }
 
-<!-- ✉️ Enviar Mensagem -->
+<!-- Enviar Mensagem -->
 @if (Model.Chamado.StatusChamado?.ToLower() == "aberto" || Model.Chamado.StatusChamado?.ToLower() == "em andamento")
 {
     <form asp-controller="Cliente" asp-action="EnviarMensagem" method="post" style="margin-top:10px;display:flex;gap:10px;">
@@ -118,7 +118,7 @@ else
     </div>
 }
 
-<!-- ✅ Modal de Avaliação -->
+<!-- Modal de Avaliação -->
 @await Html.PartialAsync("~/Views/Shared/_AvaliacaoModal.cshtml")
 
 @if (Context.Request.Query.ContainsKey("avaliar") &&
@@ -133,7 +133,7 @@ else
     <script>
         const idChamado = @Model.Chamado.IdChamado;
 
-        // 🔄 Atualiza o chat a cada 5 segundos
+        // Atualiza o chat a cada 5 segundos
         async function atualizarChat() {
             try {
                 const resp = await fetch(`/Cliente/ChatPartial?id=${idChamado}`);
@@ -152,7 +152,7 @@ else
 
         setInterval(atualizarChat, 5000);
 
-        // ✅ Abre o modal de avaliação assim que o parâmetro 'avaliar=true' chega
+        // Abre o modal de avaliação assim que o parâmetro 'avaliar=true' chega
         window.addEventListener("DOMContentLoaded", () => {
             const params = new URLSearchParams(window.location.search);
             if (params.get("avaliar") === "true") {
@@ -171,7 +171,7 @@ else
             }
         });
 
-        // ⏳ Faz o aviso sumir automaticamente (menos o fixo de técnico)
+        // Faz o aviso sumir automaticamente (menos o fixo de técnico)
         window.addEventListener("load", () => {
             const aviso = document.querySelector(".alert-info, #aviso-container");
             if (aviso) {

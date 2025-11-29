@@ -1,5 +1,4 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using System.Threading.Tasks;
 using SuporteTI.Data.Models;
 
 namespace SuporteTI.API.Strategies

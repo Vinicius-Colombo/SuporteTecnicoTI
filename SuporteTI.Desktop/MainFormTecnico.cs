@@ -22,7 +22,7 @@ namespace SuporteTI.Desktop
             pbPerfil.Click += PbPerfil_Click;
         }
 
-        // ✅ Ao abrir a tela, carrega os chamados do técnico logado
+        // Ao abrir a tela, carrega os chamados do técnico logado
         private async void MainFormTecnico_Load(object? sender, EventArgs e)
         {
             try
@@ -35,7 +35,7 @@ namespace SuporteTI.Desktop
             }
         }
 
-        // 🔹 Configura visual e colunas do ListView
+        // Configura visual e colunas do ListView
         private void ConfigurarListView()
         {
             lvChamados.View = View.Details;
@@ -53,7 +53,7 @@ namespace SuporteTI.Desktop
             lvChamados.Columns.Add("Abertura", 150, HorizontalAlignment.Center);
         }
 
-        // 🔹 Ajusta largura automaticamente ao redimensionar
+        // Ajusta largura automaticamente ao redimensionar
         private void AjustarLarguraColunas()
         {
             if (lvChamados.Columns.Count == 0) return;
@@ -74,7 +74,6 @@ namespace SuporteTI.Desktop
             lvChamados.Columns[4].Width = larguraAbertura;
         }
 
-        // 🔹 Busca os chamados do técnico via API
         private async Task CarregarChamadosAsync()
         {
             lvChamados.Items.Clear();
@@ -86,7 +85,6 @@ namespace SuporteTI.Desktop
                 var chamados = await _apiService.ObterChamadosTecnicoAsync(_usuarioLogado.IdUsuario);
                 lvChamados.Items.Clear();
 
-                // 🔹 Aplicar filtros de Status e Prioridade
                 string filtroStatus = cmbStatus.SelectedItem?.ToString();
                 string filtroPrioridade = cmbPrioridade.SelectedItem?.ToString();
 
@@ -102,7 +100,6 @@ namespace SuporteTI.Desktop
                     return;
                 }
 
-                // 🔹 Popular lista
                 foreach (var chamado in chamados)
                 {
                     var item = new ListViewItem(chamado.IdChamado.ToString());
@@ -132,7 +129,6 @@ namespace SuporteTI.Desktop
 
         private async void lvChamados_SelectedIndexChanged(object sender, EventArgs e)
         {
-            // se nada selecionado, limpa os campos
             if (lvChamados.SelectedItems.Count == 0)
             {
                 lblTitulo.Text = "Título:";
@@ -147,14 +143,12 @@ namespace SuporteTI.Desktop
             var chamado = item.Tag as ChamadoReadDto;
             if (chamado == null) return;
 
-            // Preencher labels (adapte os textos conforme seu design)
             lblChamado.Text = $"Chamado #{chamado.IdChamado}";
             lblTiConteudo.Text = $" {chamado.Titulo}";
             lblDesConteudo.Text = $" {chamado.Descricao}";
             lblCliConteudo.Text = $" {chamado.Usuario?.Nome ?? "—"}";
             lblStaConteudo.Text = chamado.StatusChamado ?? "—";
 
-            // Colore o label de status (consistência com ListView)
             if (string.Equals(chamado.StatusChamado, "Aberto", StringComparison.OrdinalIgnoreCase))
             {
                 lblStaConteudo.ForeColor = SystemColors.HotTrack; // azul (Highlight)
@@ -162,7 +156,7 @@ namespace SuporteTI.Desktop
             }
             else if (string.Equals(chamado.StatusChamado, "Em Andamento", StringComparison.OrdinalIgnoreCase))
             {
-                lblStaConteudo.ForeColor = Color.FromArgb(200, 120, 0); // laranja/amarelo escuro
+                lblStaConteudo.ForeColor = Color.FromArgb(200, 120, 0);
                 lblStaConteudo.BackColor = Color.Transparent;
             }
             else
@@ -171,7 +165,6 @@ namespace SuporteTI.Desktop
                 lblStaConteudo.BackColor = Color.Transparent;
             }
 
-            // Carrega histórico de interações do chamado (faz uma chamada ao serviço API)
             await CarregarHistoricoAsync(chamado.IdChamado);
 
         }
@@ -195,7 +188,6 @@ namespace SuporteTI.Desktop
 
                 var chamado = (ChamadoReadDto)lvChamados.SelectedItems[0].Tag;
 
-                // 🔹 1. Envia a mensagem normalmente
                 var dto = new InteracaoCreateDto
                 {
                     IdChamado = chamado.IdChamado,
@@ -210,7 +202,7 @@ namespace SuporteTI.Desktop
                 {
                     txtMensagem.Clear();
 
-                    // 🔹 2. Se o chamado ainda está "Aberto", muda automaticamente para "Em Andamento"
+                    // Se o chamado ainda está "Aberto", muda automaticamente para "Em Andamento"
                     if (chamado.StatusChamado.Equals("Aberto", StringComparison.OrdinalIgnoreCase))
                     {
                         chamado.StatusChamado = "Em Andamento";
@@ -319,10 +311,8 @@ namespace SuporteTI.Desktop
 
         private void PbPerfil_Click(object? sender, EventArgs e)
         {
-            // Cria o mini perfil e mostra próximo ao ícone
             var perfilForm = new PerfilMiniForm(_usuarioLogado);
 
-            // Define a posição — ao lado do ícone de perfil
             var pos = pbPerfil.PointToScreen(Point.Empty);
             perfilForm.StartPosition = FormStartPosition.Manual;
             perfilForm.Location = new Point(pos.X + pbPerfil.Width - perfilForm.Width, pos.Y + pbPerfil.Height);

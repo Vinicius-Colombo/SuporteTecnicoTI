@@ -24,13 +24,11 @@ namespace SuporteTI.Desktop
             btnAtualizar.Click += btnAtualizar_Click;
         }
 
-        // 🔹 Carrega o usuário ao abrir o formulário
         private async void FormEditarUsuario_Load(object? sender, EventArgs e)
         {
             await CarregarDadosUsuarioAsync();
         }
 
-        // 🔹 Carrega os dados do usuário selecionado
         private async Task CarregarDadosUsuarioAsync()
         {
             try
@@ -49,7 +47,6 @@ namespace SuporteTI.Desktop
                     return;
                 }
 
-                // 🔹 Preenche os campos do formulário
                 txbId.Text = usuario.IdUsuario.ToString();
                 txbNome.Text = usuario.Nome;
                 txbEmail.Text = usuario.Email;
@@ -78,16 +75,13 @@ namespace SuporteTI.Desktop
                     return;
                 }
 
-                // 🔹 Limpa CPF e telefone
                 var cpfLimpo = new string(mtbCpf.Text.Where(char.IsDigit).ToArray());
                 var telefoneLimpo = new string(mtbTelefone.Text.Where(char.IsDigit).ToArray());
 
-                // 🔹 Tenta converter a data
                 DateTime? dataNasc = null;
                 if (DateTime.TryParseExact(msbDataNascimento.Text, "dd/MM/yyyy", null, System.Globalization.DateTimeStyles.None, out var dataValida))
                     dataNasc = dataValida;
 
-                // 🔹 Cria DTO de atualização
                 var dto = new UsuarioUpdateDto
                 {
                     IdUsuario = _idUsuario,
@@ -100,7 +94,6 @@ namespace SuporteTI.Desktop
                     Ativo = cmbStatus.SelectedItem?.ToString() == "Ativo"
                 };
 
-                // 🔹 Envia atualização
                 var response = await _apiService.PutAsync($"Usuario/{_idUsuario}", dto);
 
                 if (!response.IsSuccessStatusCode)

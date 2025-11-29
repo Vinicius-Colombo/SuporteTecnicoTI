@@ -16,9 +16,6 @@ namespace SuporteTI.Web.Controllers
             _logger = logger;
         }
 
-        // =====================================
-        // 🧩 LOGIN (GET)
-        // =====================================
         [HttpGet]
         public IActionResult Login()
         {
@@ -28,16 +25,12 @@ namespace SuporteTI.Web.Controllers
             return View();
         }
 
-        // =====================================
-        // 🧩 LOGIN (POST)
-        // =====================================
         [HttpPost]
         public async Task<IActionResult> Login(LoginModel model)
         {
             if (!ModelState.IsValid)
                 return View(model);
 
-            // Valida credenciais via API Azure
             var usuario = await _api.PostAsync<LoginResponseDto>("Auth/validar-usuario", new
             {
                 Email = model.Email,
@@ -50,14 +43,12 @@ namespace SuporteTI.Web.Controllers
                 return View(model);
             }
 
-            // Somente cliente acessa web
             if (!usuario.Tipo.Equals("Cliente", StringComparison.OrdinalIgnoreCase))
             {
                 ModelState.AddModelError("", "Somente clientes podem acessar o portal web.");
                 return View(model);
             }
 
-            // Se já validado, entra direto
             if (usuario.CodigoValidado)
             {
                 CriarSessao(usuario);
@@ -65,7 +56,6 @@ namespace SuporteTI.Web.Controllers
                 return RedirectToAction("Novo", "Cliente");
             }
 
-            // Solicita envio de código
             var codigoResp = await _api.PostAsync<object>("Auth/solicitar-codigo", new
             {
                 Email = model.Email,
@@ -84,9 +74,6 @@ namespace SuporteTI.Web.Controllers
             return RedirectToAction("ValidarCodigo");
         }
 
-        // =====================================
-        // 🔐 VALIDAR CÓDIGO (GET)
-        // =====================================
         [HttpGet]
         public IActionResult ValidarCodigo()
         {
@@ -98,9 +85,6 @@ namespace SuporteTI.Web.Controllers
             return View();
         }
 
-        // =====================================
-        // 🔐 VALIDAR CÓDIGO (POST)
-        // =====================================
         [HttpPost]
         public async Task<IActionResult> ValidarCodigo(string codigo)
         {
@@ -132,9 +116,7 @@ namespace SuporteTI.Web.Controllers
             return RedirectToAction("Novo", "Cliente");
         }
 
-        // =====================================
-        // 🧱 CONTROLE DE SESSÃO
-        // =====================================
+        // CONTROLE DE SESSÃO
         private void CriarSessao(LoginResponseDto usuario)
         {
             HttpContext.Session.SetInt32("IdUsuario", usuario.IdUsuario);

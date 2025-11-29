@@ -15,9 +15,7 @@ namespace SuporteTI.Web.Controllers
             _api = api;
         }
 
-        // =============================
-        // 🔐 Verifica sessão do cliente logado
-        // =============================
+        // Verifica sessão do cliente logado
         private int? ObterIdCliente()
         {
             return HttpContext.Session.GetInt32("IdUsuario");
@@ -30,9 +28,7 @@ namespace SuporteTI.Web.Controllers
             return null!;
         }
 
-        // =============================
-        // 🧩 ABRIR CHAMADO
-        // =============================
+        // ABRIR CHAMADO
         [HttpGet]
         public IActionResult Novo()
         {
@@ -67,9 +63,7 @@ namespace SuporteTI.Web.Controllers
             return RedirectToAction("Novo");
         }
 
-        // =============================
-        // 🧾 HISTÓRICO
-        // =============================
+        // HISTÓRICO
         public async Task<IActionResult> Historico()
         {
             var redir = VerificarLogin();
@@ -82,20 +76,16 @@ namespace SuporteTI.Web.Controllers
             return View(chamados);
         }
 
-        // =============================
-        // 👤 PERFIL DO CLIENTE
-        // =============================
+        // PERFIL DO CLIENTE
         [HttpGet]
         public async Task<IActionResult> Perfil()
         {
             ViewBag.Nav = "Perfil";
 
-            // Pega o ID do cliente logado da sessão
             int? idUsuario = HttpContext.Session.GetInt32("IdUsuario");
             if (idUsuario == null)
                 return RedirectToAction("Login", "AuthWeb");
 
-            // Busca os dados atualizados do cliente pela API
             var usuario = await _api.ObterUsuarioPorIdAsync(idUsuario.Value);
             if (usuario == null)
             {
@@ -106,10 +96,6 @@ namespace SuporteTI.Web.Controllers
             return View(usuario);
         }
 
-
-        // =============================
-        // 💬 CHAT DO CHAMADO
-        // =============================
         public async Task<IActionResult> Chat(int id)
         {
             var redir = VerificarLogin();
@@ -146,9 +132,6 @@ namespace SuporteTI.Web.Controllers
             return View(model);
         }
 
-        // =============================
-        // ✉️ ENVIAR MENSAGEM
-        // =============================
         [HttpPost]
         public async Task<IActionResult> EnviarMensagem(int IdChamado, string Mensagem)
         {
@@ -168,9 +151,6 @@ namespace SuporteTI.Web.Controllers
             return RedirectToAction("Chat", new { id = IdChamado });
         }
 
-        // =============================
-        // 📎 ENVIAR ANEXO
-        // =============================
         [HttpPost]
         public async Task<IActionResult> EnviarAnexo(int idChamado, IFormFile arquivo)
         {
@@ -191,9 +171,6 @@ namespace SuporteTI.Web.Controllers
             return RedirectToAction("Chat", new { id = idChamado });
         }
 
-        // =============================
-        // 📥 BAIXAR ANEXO
-        // =============================
         [HttpPost]
         public async Task<IActionResult> BaixarAnexo(int idAnexo, int idChamado)
         {
@@ -210,9 +187,6 @@ namespace SuporteTI.Web.Controllers
             return File(bytes, tipo ?? "application/octet-stream", nome ?? $"anexo_{idAnexo}.bin");
         }
 
-        // =============================
-        // 🔎 STATUS + AVALIAÇÃO
-        // =============================
         [HttpGet]
         public async Task<IActionResult> StatusChamado(int id)
         {
@@ -236,9 +210,6 @@ namespace SuporteTI.Web.Controllers
             return Json(new { status, precisaAvaliar });
         }
 
-        // =============================
-        // 📝 AVALIAÇÃO
-        // =============================
         [HttpPost]
         public async Task<IActionResult> EnviarAvaliacao(int idChamado, int nota, string? comentario)
         {
@@ -253,12 +224,6 @@ namespace SuporteTI.Web.Controllers
             return RedirectToAction("Chat", new { id = idChamado, avaliarEnviado = ok });
         }
 
-        // =============================
-        // 🔔 NOTIFICAÇÕES
-        // =============================
-        // =============================
-        // 🔔 NOTIFICAÇÕES DE AVALIAÇÃO
-        // =============================
         [HttpGet]
         public async Task<IActionResult> Notificacoes()
         {
@@ -300,10 +265,6 @@ namespace SuporteTI.Web.Controllers
             return Json(pendentes);
         }
 
-
-        // =============================
-        // 🤖 RESPOSTA À IA
-        // =============================
         [HttpPost]
         public async Task<IActionResult> ResponderIA(int idChamado, string resposta)
         {
@@ -371,9 +332,6 @@ namespace SuporteTI.Web.Controllers
             return PartialView("_ChatMensagens", model);
         }
 
-        // =============================
-        // 📋 CHAMADOS RECENTES
-        // =============================
         [HttpGet]
         public async Task<IActionResult> ChamadosRecentes()
         {
@@ -391,9 +349,6 @@ namespace SuporteTI.Web.Controllers
             return PartialView("_ChamadosRecentes", top5);
         }
 
-        // =============================
-        // 🔔 NOTIFICAÇÕES DE MENSAGENS
-        // =============================
         [HttpGet]
         public async Task<IActionResult> NotificacoesMensagens()
         {

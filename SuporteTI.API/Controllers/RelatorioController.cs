@@ -17,7 +17,6 @@ namespace SuporteTI.API.Controllers
             _context = context;
         }
 
-        // 🔹 GET: api/Relatorio/chamados-status?status=aberto
         [HttpGet("chamados-status")]
         public async Task<IActionResult> RelatorioPorStatus([FromQuery] string? status = null)
         {
@@ -70,7 +69,6 @@ namespace SuporteTI.API.Controllers
             });
         }
 
-        // 🔹 GET: api/Relatorio/chamados-prioridade?prioridade=Alta
         [HttpGet("chamados-prioridade")]
         public async Task<IActionResult> RelatorioPorPrioridade([FromQuery] string? prioridade = null)
         {
@@ -124,7 +122,7 @@ namespace SuporteTI.API.Controllers
                 Chamados = chamadosDto
             });
         }
-        // 🔹 GET: api/Relatorio/avaliacoes?idTecnico=5
+
         [HttpGet("avaliacoes")]
         public async Task<IActionResult> Avaliacoes([FromQuery] int? idTecnico = null)
         {
@@ -151,7 +149,6 @@ namespace SuporteTI.API.Controllers
             return Ok(avaliacoes);
         }
 
-        // 🔹 GET: api/Relatorio/chamados-diarios
         [HttpGet("chamados-diarios")]
         public async Task<IActionResult> RelatorioChamadosDiarios()
         {
@@ -167,7 +164,6 @@ namespace SuporteTI.API.Controllers
                 })
                 .ToListAsync();
 
-            // 🚨 Corrigido: "Em Atendimento" → "Em Andamento"
             var todosStatus = new[] { "Aberto", "Em Andamento", "Resolvido", "Encerrado" };
 
             var resultado = todosStatus.Select(s => new ChamadoStatusResumoDto
@@ -180,7 +176,6 @@ namespace SuporteTI.API.Controllers
             return Ok(resultado);
         }
 
-        // 🔹 GET: api/Relatorio/mensal
         [HttpGet("mensal")]
         public async Task<IActionResult> RelatorioMensal()
         {
@@ -197,7 +192,6 @@ namespace SuporteTI.API.Controllers
             var abertos = await chamadosDoMes
                 .CountAsync(c => (c.StatusChamado ?? "").ToLower() == "aberto");
 
-            // 🚨 Corrigido: "fechado" → "encerrado" ou "resolvido"
             var encerrados = await chamadosDoMes
                 .CountAsync(c =>
                     (c.StatusChamado ?? "").ToLower() == "encerrado" ||
@@ -216,25 +210,21 @@ namespace SuporteTI.API.Controllers
 
             return Ok(resultado);
         }
-        // 🔹 POST: api/Relatorio/filtrado
+
         [HttpPost("filtrado")]
         public async Task<IActionResult> Filtrado([FromBody] RelatorioRequestDto filtros)
         {
             if (filtros == null)
                 return BadRequest("Filtros inválidos.");
 
-            // ===============================
-            // 📊 Consulta Base
-            // ===============================
+            // Consulta Base
             var query = _context.Chamados
                 .Include(c => c.IdUsuarioNavigation)
                 .Include(c => c.IdTecnicoNavigation)
                 .Include(c => c.IdCategoriaNavigation)
                 .AsQueryable();
 
-            // ===============================
-            // 📆 Filtro de Período
-            // ===============================
+            // Filtro de Período
             DateTime hoje = DateTime.Today;
             DateTime inicio = hoje;
             DateTime fim = DateTime.Now;
@@ -267,27 +257,21 @@ namespace SuporteTI.API.Controllers
 
             query = query.Where(c => c.DataAbertura >= inicio && c.DataAbertura <= fim);
 
-            // ===============================
-            // 👨‍🔧 Filtro por Técnico
-            // ===============================
+            // Filtro por Técnico
             if (filtros.IdTecnico.HasValue && filtros.IdTecnico > 0)
             {
                 int idTec = filtros.IdTecnico.Value;
                 query = query.Where(c => c.IdTecnico == idTec);
             }
 
-            // ===============================
-            // 🧩 Filtro por Categoria
-            // ===============================
+            // Filtro por Categoria
             if (filtros.IdCategoria.HasValue && filtros.IdCategoria > 0)
             {
                 int idCat = filtros.IdCategoria.Value;
                 query = query.Where(c => c.IdCategoria == idCat);
             }
 
-            // ===============================
-            // ⚙️ Filtro por Prioridade
-            // ===============================
+            // Filtro por Prioridade
             if (!string.IsNullOrWhiteSpace(filtros.Prioridade) &&
                 !filtros.Prioridade.Equals("todas", StringComparison.OrdinalIgnoreCase))
             {
@@ -295,17 +279,12 @@ namespace SuporteTI.API.Controllers
                 query = query.Where(c => (c.Prioridade ?? "").ToLower() == prioridade);
             }
 
-            // ===============================
-            // 📦 Busca no banco
-            // ===============================
+            // Busca no banco
             var chamados = await query.AsNoTracking().ToListAsync();
 
-            // ===============================
-            // 📋 Montagem dos dados do relatório
-            // ===============================
+            // Montagem dos dados do relatório
             var totalChamados = chamados.Count;
 
-            // 🚨 Corrigido: seu sistema usa "Encerrado" ou "Resolvido"
             var resolvidosPrazo = chamados.Count(c =>
                 (c.StatusChamado ?? "").ToLower() == "encerrado" ||
                 (c.StatusChamado ?? "").ToLower() == "resolvido");
@@ -324,9 +303,7 @@ namespace SuporteTI.API.Controllers
                 .Select(g => g.Key)
                 .FirstOrDefault() ?? "Nenhuma";
 
-            // ===============================
-            // 📄 Dados detalhados
-            // ===============================
+            // Dados detalhados
             var chamadosDetalhados = chamados.Select(c => new ChamadoDetalhadoDto
             {
                 IdChamado = c.IdChamado,
@@ -336,7 +313,6 @@ namespace SuporteTI.API.Controllers
                 Categoria = c.IdCategoriaNavigation?.Nome ?? "Sem categoria",
                 Prioridade = c.Prioridade ?? "-",
 
-                // 🔹 Tempo de atendimento
                 TempoAtendimento =
                     c.DataFechamento != null
                         ? $"{(c.DataFechamento!.Value - (c.DataAbertura ?? c.DataFechamento!.Value)).TotalHours:F1}h"
@@ -347,9 +323,7 @@ namespace SuporteTI.API.Controllers
 
             }).ToList();
 
-            // ===============================
-            // 📈 GRÁFICOS
-            // ===============================
+            // GRÁFICOS
             var graficos = new
             {
                 categorias = chamados
@@ -373,9 +347,7 @@ namespace SuporteTI.API.Controllers
                     .ToList()
             };
 
-            // ===============================
-            // 🏅 RANKINGS
-            // ===============================
+            // RANKINGS
             var rankings = new
             {
                 tecnicos = chamados
@@ -395,9 +367,7 @@ namespace SuporteTI.API.Controllers
                     .ToList()
             };
 
-            // ===============================
-            // ✅ Retorno Final
-            // ===============================
+            // Retorno Final
             var retorno = new
             {
                 resumo = new

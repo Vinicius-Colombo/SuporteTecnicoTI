@@ -7,20 +7,23 @@ using SuporteTI.Data.Models;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using SuporteTI.API.Services;
 
 namespace SuporteTI.API.Controllers
 {
-    [Route("api/[controller]")]
     [ApiController]
+    [Route("api/[controller]")]
     public class AuthController : ControllerBase
     {
         private readonly SuporteTiDbContext _context;
         private readonly IConfiguration _configuration;
+        private readonly IEmailService _emailService; 
 
-        public AuthController(SuporteTiDbContext context, IConfiguration configuration)
+        public AuthController(SuporteTiDbContext context, IConfiguration configuration, IEmailService emailService)
         {
             _context = context;
             _configuration = configuration;
+            _emailService = emailService;
         }
 
         // Inserir email e senha para solicitar o código de verificação
@@ -37,9 +40,33 @@ namespace SuporteTI.API.Controllers
 
             var strategy = AutenticacaoStrategyFactory.ObterStrategy(usuario, _context, _configuration);
             var resultado = await strategy.ExecutarAsync(usuario);
-            return resultado;
 
+            // Recarrega o usuário para obter o Código gerado
+            var usuarioAtualizado = await _context.Usuarios.FirstOrDefaultAsync(u => u.IdUsuario == usuario.IdUsuario);
+
+            if (usuarioAtualizado != null && !string.IsNullOrWhiteSpace(usuarioAtualizado.CodigoVerificacao))
+            {
+                try
+                {
+                    var subject = "Código de verificação - SuporteTI";
+                    var body = $@"
+                    <p>Olá {usuarioAtualizado.Nome},</p>
+                    <p>Seu código de verificação é:</p>
+                    <h2>{usuarioAtualizado.CodigoVerificacao}</h2>
+                    <br/>
+                    <p>Atenciosamente,<br/>Equipe SuporteTI</p>";
+
+                    await _emailService.SendEmailAsync(usuarioAtualizado.Email, subject, body);
+                }
+                catch (Exception ex)
+                {
+                    return StatusCode(500, $"Código gerado, mas falha ao enviar e-mail: {ex.Message}");
+                }
+            }
+
+            return resultado;
         }
+
 
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] LoginCodigoModel login)
@@ -102,19 +129,15 @@ namespace SuporteTI.API.Controllers
             if (usuario == null)
                 return Unauthorized("Usuário ou senha inválidos.");
 
-            // 🔹 Retorna também o campo CodigoValidado
             return Ok(new
             {
                 IdUsuario = usuario.IdUsuario,
                 Nome = usuario.Nome,
                 Email = usuario.Email,
                 Tipo = usuario.Tipo,
-                CodigoValidado = usuario.CodigoValidado  == true// 👈 ADICIONADO AQUI
+                CodigoValidado = usuario.CodigoValidado  == true
             });
         }
-
-
-
 
         public class LoginCodigoModel
         {
