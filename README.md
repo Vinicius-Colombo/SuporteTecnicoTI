@@ -1,0 +1,1 @@
+Meu projeto acadêmico feito em dupla, fiquei responsavel em criar o back-end. O projeto é um sistema de assistencia na area de TI com foco no auxilio da IA para resolver o problemas enviados pelos clientes.
